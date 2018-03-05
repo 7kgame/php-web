@@ -1,0 +1,25 @@
+{
+    "name": "7k7k/php-web",
+    "description": "php web framework",
+    "keywords": ["7k7k", "php", "web", "framework"],
+    "homepage": "http://github.com/7kgame/php-web",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "chenyijun",
+            "email": "chenyijun@7k7k.com"
+        }
+    ],
+    "require": {
+      "7k7k/php-common": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {"QKPHP\\Web\\": "src"}
+    },
+    "minimum-stability": "dev",
+    "classmap": ["src/"],
+    "require": {
+      "php": ">=5.3.0"
+    }
+}

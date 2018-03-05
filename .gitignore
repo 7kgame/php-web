@@ -1,0 +1,14 @@
+.DS_Store
+
+composer.lock
+/vendor
+
+.idea
+.gradle
+.settings
+.classpath
+.project
+project.properties
+lint.xml
+
+*.swp
