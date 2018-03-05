@@ -20,7 +20,7 @@
     },
     "minimum-stability": "dev",
     "classmap": ["src/"],
-    "script": {
+    "scripts": {
       "post-autoload-dump": ["QKPHP\\Web\\Application::updateRouter"]
     }
 }
