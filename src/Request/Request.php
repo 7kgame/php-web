@@ -29,7 +29,6 @@ class Request {
     }
     $params3 = array();
     $method = strtoupper($_SERVER['REQUEST_METHOD']);
-    var_dump($_SERVER['CONTENT_TYPE']);
     if ($method == 'POST' || $method == 'PUT' || $method == 'PATCH') {
       if (empty($_POST)) {
         $input = file_get_contents("php://input");
