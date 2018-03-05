@@ -104,4 +104,8 @@ class Application {
     header('Access-Control-Max-Age: 3600');
   }
 
+  public static function updateRouter () {
+    echo "updateRouter ====\n";
+  }
+
 }
