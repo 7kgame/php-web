@@ -6,7 +6,6 @@ use \QKPHP\Web\QKObject;
 
 class Common extends QKObject {
 
-  private $config;
   private $isMaster = false;
 
   private $mysqlConfig;
@@ -18,7 +17,6 @@ class Common extends QKObject {
     if (empty($config)) {
       $config = array();
     }
-    $this->config = $config;
     isset($config['master']) ? ($this->isMaster = $config['master']) : null;
     isset($config['mysql']) ? ($this->mysqlConfig = $config['mysql']) : null;
     isset($config['redis']) ? ($this->redisConfig = $config['redis']) : null;
