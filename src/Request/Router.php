@@ -9,6 +9,7 @@ class Router {
 
   public $class;
   public $file;
+  public $filePath;
   public $classAnnos;
   public $annos;
   public $meta;
@@ -56,6 +57,7 @@ class Router {
     $this->method = $this->meta['method'];
     $classInfo = $this->router['class'][$this->meta['class']];
     $this->file = $classInfo['file'];
+    $this->filePath = $this->meta['class'];
     $this->class = $classInfo['class'];
     $this->classAnnos = $classInfo['annos'];
     $this->paramsSize = $this->meta['paramsSize'];
