@@ -20,7 +20,7 @@ class View {
 
   public function render($script) {
     ob_start();
-    include $script;
+    require($script);
     $html = ob_get_clean();
     return $html;
   }

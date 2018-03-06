@@ -51,7 +51,7 @@ class Application {
       $this->showHttpError('404');
     }
 
-    include($this->getControllerPath() . DIRECTORY_SEPARATOR . $router->file);
+    require($this->getControllerPath() . DIRECTORY_SEPARATOR . $router->file);
     $controller = new $router->class;
     $action = $router->method;
 

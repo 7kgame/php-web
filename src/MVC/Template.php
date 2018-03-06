@@ -38,7 +38,7 @@ class Template {
     foreach($this->templateVars as $key => $value) {
       $this->$key = $value;
     }
-    include $template;
+    require($template);
   }
 
 }
