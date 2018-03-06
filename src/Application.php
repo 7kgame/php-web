@@ -99,6 +99,9 @@ class Application {
     if (isset($this->fieldObjectContainer[$fieldName])) {
       return;
     }
+    if (!empty($config)) {
+      $packageName = array($packageName, $config);
+    }
     $this->fieldObjectContainer[$fieldName] = $packageName;
     $this->objectContainer[$packageName] = $packageName;
   }
@@ -108,9 +111,19 @@ class Application {
       return null;
     }
     $packageName = $this->fieldObjectContainer[$fieldName];
+    $config = null;
+    if (is_array($packageName)) {
+      $config = $packageName[1];
+      $packageName = $packageName[0];
+    }
     $ins = $this->objectContainer[$packageName];
     if (is_string($ins)) {
-      $this->objectContainer[$packageName] = new $ins;
+      if (empty($config)) {
+        $ins = new $ins;
+      } else {
+        $ins = new $ins($config);
+      }
+      $this->objectContainer[$packageName] = $ins;
     }
     return $this->objectContainer[$packageName];
   }
