@@ -20,7 +20,20 @@ class Application {
   private $controllerDir = self::CONTROLLER_DIR;
   private $configDir = self::CONFIG_DIR;
 
-  public function __construct ($webroot, array $options=null) {
+  private function __construct() {}
+
+  private function __clone() {}
+
+  private static $ins;
+
+  public static function getInstance () {
+    if (empty(self::$ins)) {
+      self::$ins = new Application();
+    }
+    return self::$ins;
+  }
+
+  public function init ($webroot, array $options=null) {
     $this->webroot = $webroot;
     if (!empty($options)) {
       isset($options['router']) ? $this->routerDir = $options['router'] : null;
@@ -31,9 +44,7 @@ class Application {
       }
     }
     Config::setConfigDir($this->getConfigPath());
-  }
-
-  public function init () {
+    return $this;
   }
 
   public function start () {
