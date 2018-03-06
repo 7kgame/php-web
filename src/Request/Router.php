@@ -20,7 +20,10 @@ class Router {
 
   public function __construct($routerDir, $routerName) {
     $this->target = $routerName;
-    $this->router = require($routerDir . DIRECTORY_SEPARATOR . $routerName . '.php');
+    $routerFile = $routerDir . DIRECTORY_SEPARATOR . $routerName . '.php';
+    if (is_file($routerFile)) {
+      $this->router = require($routerFile);
+    }
   }
 
   public function parse(array $paths, $method='get') {
