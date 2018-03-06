@@ -16,11 +16,6 @@ class Router {
   private static $router = Application::ROUTER_DIR;
   private static $controller = Application::CONTROLLER_DIR;
 
-  private static function addAutoLoader ($path) {
-    Loader::setIncludePath(array($path));
-    Loader::load();
-  }
-
   public static function gen ($event=null) {
     if (empty($event)) {
       $event = array();
@@ -188,6 +183,11 @@ class Router {
     }
     $out = "<?php\nreturn " . var_export($routerInfo, true) . ";\n";
     file_put_contents($routerFile, $out);
+  }
+
+  private static function addAutoLoader ($path) {
+    Loader::setIncludePath(array($path));
+    Loader::load();
   }
 
 }
