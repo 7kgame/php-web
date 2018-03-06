@@ -19,8 +19,5 @@
         "psr-4": {"QKPHP\\Web\\": "src"}
     },
     "minimum-stability": "dev",
-    "classmap": ["src/"],
-    "scripts": {
-      "post-autoload-dump": ["QKPHP\\Web\\Application::updateRouter"]
-    }
+    "classmap": ["src/"]
 }
