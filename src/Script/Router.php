@@ -143,6 +143,9 @@ class Router {
   }
 
   private static function genRouterFile ($fileName, $annos, $className, $classFile, $controllerDir, $routerDir) {
+    if ($fileName == '/') {
+      $fileName = '_';
+    }
     $classRelativePath = rtrim(trim(str_replace($controllerDir, '', $classFile), '/'), '.php');
     $routerFile = $routerDir . DIRECTORY_SEPARATOR . $fileName . '.php';
     $routerInfo = array();
