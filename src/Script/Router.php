@@ -17,7 +17,11 @@ class Router {
 
   public static function gen ($event) {
     $cwd = getcwd();
-    $arguments = $event->getArguments();
+    if (!empty($event)) {
+      $arguments = $event->getArguments();
+    } else {
+      $arguments = array();
+    }
     if (count($arguments) > 0) {
       self::$controller = $arguments[0];
     }
@@ -50,8 +54,11 @@ class Router {
         $fileParts = explode(DIRECTORY_SEPARATOR, $file);
         $className = rtrim(array_pop($fileParts), '.php');
         $annotations = Annotation::parse($className, $file); 
-        list($path, $annos) = self::parseOne($annotations);
-        self::genRouterFile($path, $annos, $className, $file, $controllerDir, $routerDir);
+        $parseResult = self::parseOne($annotations);
+        if (empty($parseResult)) {
+          exit(0);
+        }
+        self::genRouterFile($parseResult[0], $parseResult[1], $className, $file, $controllerDir, $routerDir);
         exit(0);
       }
     }
