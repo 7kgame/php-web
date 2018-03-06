@@ -3,13 +3,12 @@
 namespace QKPHP\Web;
 
 use \QKPHP\Web\QKObject;
+use \QKPHP\Web\Dao\Common;
 
 abstract class Service extends QKObject {
 
   private $daoPackage;
   private $dao = array();
-
-  private $objectContainer = array();
 
   public function __construct($daoPackage) {
     $this->daoPackage = $daoPackage;
@@ -54,30 +53,6 @@ abstract class Service extends QKObject {
 
   public function rollBackGlobal() {
     $this->getDao(true)->rollBackGlobal();
-  }
-
-  protected function registerObject($fieldName, $package) {
-    $this->objectContainer[$fieldName] = $package;
-  }
-
-  public function __get($fieldName) {
-    if(isset($this->$fieldName)) {
-      return $this->$fieldName;
-    }
-    if(!isset($this->objectContainer[$fieldName]) || empty($this->objectContainer[$fieldName])) {
-      return null;
-    }
-
-    $type = gettype($this->objectContainer[$fieldName]);
-    if($type == "object") {
-      return $this->objectContainer[$fieldName];
-    } else if($type == "string") {
-      $class = $this->objectContainer[$fieldName];
-      $this->objectContainer[$fieldName] = new $class;
-      return $this->objectContainer[$fieldName];
-    } else {
-      return null;
-    }
   }
 
   public function insertEntity(array $fields, array $data, $multi=false, $getId=true) {
