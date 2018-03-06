@@ -15,8 +15,7 @@ class Router {
   private static $router = Application::ROUTER_DIR;
   private static $controller = Application::CONTROLLER_DIR;
 
-  public static function gen ($event) {
-    $cwd = getcwd();
+  public static function gen ($event=null) {
     if (!empty($event)) {
       $arguments = $event->getArguments();
     } else {
@@ -28,6 +27,7 @@ class Router {
     if (count($arguments) > 1) {
       self::$router = $arguments[1];
     }
+    $cwd = getcwd();
     $controllerDir = $cwd . DIRECTORY_SEPARATOR . self::$controller;
     $routerDir = $cwd . DIRECTORY_SEPARATOR . self::$router;
 
