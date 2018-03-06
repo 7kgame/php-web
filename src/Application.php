@@ -87,6 +87,34 @@ class Application {
     die();
   }
 
+  // all instance container, packageName => instance
+  private $objectContainer = array();
+  // fieldName => packageName
+  private $fieldObjectContainer = array();
+
+  public function registerObject($fieldName, $packageName, array $config=null) {
+    if (empty($fieldName) || empty($packageName)) {
+      return;
+    }
+    if (isset($this->fieldObjectContainer[$fieldName])) {
+      return;
+    }
+    $this->fieldObjectContainer[$fieldName] = $packageName;
+    $this->objectContainer[$packageName] = $packageName;
+  }
+
+  public function getObject($fieldName) {
+    if (!isset($this->fieldObjectContainer[$fieldName])) {
+      return null;
+    }
+    $packageName = $this->fieldObjectContainer[$fieldName];
+    $ins = $this->objectContainer[$packageName];
+    if (is_string($ins)) {
+      $this->objectContainer[$packageName] = new $ins;
+    }
+    return $this->objectContainer[$packageName];
+  }
+
   public function getRouterPath () {
     return $this->webroot . DIRECTORY_SEPARATOR . $this->routerDir;
   }

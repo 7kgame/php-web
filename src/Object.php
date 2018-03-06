@@ -1,31 +1,18 @@
 <?php
 namespace QKPHP\Web;
 
+use \QKPHP\Web\Application;
+
 abstract class Object {
 
-  private $objectContainer = array();
-
-  protected function registerObject($fieldName, $package) {
-    $this->objectContainer[$fieldName] = $package;
+  protected function registerObject($fieldName, $packageName, array $config=null) {
+    Application::getInstance()->registerObject($fieldName, $packageName, $config);
   }
 
   public function __get($fieldName) {
     if(isset($this->$fieldName)) {
       return $this->$fieldName;
     }
-    if(!isset($this->objectContainer[$fieldName]) || empty($this->objectContainer[$fieldName])) {
-      return null;
-    }
-
-    $type = gettype($this->objectContainer[$fieldName]);
-    if($type == "object") {
-      return $this->objectContainer[$fieldName];
-    } else if($type == "string") {
-      $class = $this->objectContainer[$fieldName];
-      $this->objectContainer[$fieldName] = new $class;
-      return $this->objectContainer[$fieldName];
-    } else {
-      return null;
-    }
+    return Application::getInstance()->getObject($fieldName);
   }
 }
