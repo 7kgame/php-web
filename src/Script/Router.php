@@ -4,7 +4,6 @@ namespace QKPHP\Web\Script;
 use \QKPHP\Common\Utils\Url;
 use \QKPHP\Common\Utils\Utils;
 use \QKPHP\Common\Utils\Annotation;
-use \QKPHP\Common\Loader;
 use \QKPHP\Web\Application;
 
 class Router {
@@ -34,8 +33,6 @@ class Router {
     $cwd = getcwd();
     $controllerDir = $cwd . DIRECTORY_SEPARATOR . self::$controller;
     $routerDir = $cwd . DIRECTORY_SEPARATOR . self::$router;
-
-    Loader::setIncludePath(array($controllerDir));
 
     if (!file_exists($controllerDir)) {
       die("controller dir \"$controllerDir\" is not exist!\n");
