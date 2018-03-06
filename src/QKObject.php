@@ -3,7 +3,7 @@ namespace QKPHP\Web;
 
 use \QKPHP\Web\Application;
 
-abstract class Object {
+abstract class QKObject {
 
   protected function registerObject($fieldName, $packageName, array $config=null) {
     Application::getInstance()->registerObject($fieldName, $packageName, $config);

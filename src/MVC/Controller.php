@@ -2,7 +2,9 @@
 
 namespace QKPHP\Web\MVC;
 
-abstract class Controller extends \QKPHP\Web\Object {
+use \QKPHP\Web\QKObject;
+
+abstract class Controller extends QKObject {
 
   //Section init
   protected $application;

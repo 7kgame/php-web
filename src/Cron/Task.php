@@ -2,7 +2,9 @@
 
 namespace QKPHP\Web\Cron;
 
-abstract class Task extends \QKPHP\Web\Object {
+use \QKPHP\Web\QKObject;
+
+abstract class Task extends QKObject {
 
   abstract public function process($params=array());
 

@@ -2,7 +2,9 @@
 
 namespace QKPHP\Web;
 
-abstract class Service {
+use \QKPHP\Web\QKObject;
+
+abstract class Service extends QKObject {
 
   private $daoPackage;
   private $dao = array();
