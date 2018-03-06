@@ -16,10 +16,13 @@ class Router {
   private static $controller = Application::CONTROLLER_DIR;
 
   public static function gen ($event=null) {
-    if (!empty($event)) {
+    if (empty($event)) {
+      $event = array();
+    }
+    if (!is_array($event)) {
       $arguments = $event->getArguments();
     } else {
-      $arguments = array();
+      $arguments = $event;
     }
     if (count($arguments) > 0) {
       self::$controller = $arguments[0];
