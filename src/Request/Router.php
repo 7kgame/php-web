@@ -9,6 +9,7 @@ class Router {
 
   public $class;
   public $file;
+  public $classAnnos;
   public $annos;
   public $meta;
   public $pattern;
@@ -16,45 +17,33 @@ class Router {
   public $params;
   public $method;
 
-  public function __construct(array $router) {
-    $this->router = $router;
+  public function __construct($routerDir, $routerName) {
+    $this->target = $routerName;
+    $this->router = require($routerDir . DIRECTORY_SEPARATOR . $routerName . '.php');
   }
 
-  public function parse($paths, $method='get') {
-    if (!is_array($paths)) {
-      $paths = explode('/', trim($paths, '/'));
-    }
+  public function parse(array $paths, $method='get') {
     if (empty($paths)) {
-      $paths = array();
+      $paths = array('/');
     }
-    $target = array_slice($paths, 0, 1);
-    $paths = array_slice($paths, 1);
-    if (empty($target)) {
-      $target = '/';
-    } else {
-      $target = $target[0];
-    }
+    $this->paths = $paths;
     $method = strtoupper($method);
-    if (!isset($this->router[$target]) || !isset($this->router[$target][$method])) {
+    if (!isset($this->router[$method])) {
       return null;
     }
-    $this->target = $target;
-    $this->paths = $paths;
-    $this->class = $this->router[$target]['_class'];
-    $this->file = $this->router[$target]['_file'];
-    $router = $this->router[$target][$method];
-    $paths0 = implode('/', $paths);
-    if (isset($router[$paths0])) {
-      $this->meta = $router[$paths0];
-      $this->pattern = $paths0;
+
+    $pathStr = implode('/', $paths);
+    if (isset($this->router[$method][$pathStr])) {
+      $this->meta = $this->router[$method][$pathStr];
+      $this->pattern = $pathStr;
       $this->params = null;
     } else {
       $this->pattern = null;
-      foreach ($router as $k=>$v) {
-        $params = $this->searchPattern($k, $v);
+      foreach ($this->router[$method] as $path => $v) {
+        $params = $this->searchPattern($path, $v);
         if (!empty($params)) {
           $this->meta = $v;
-          $this->pattern = $k;
+          $this->pattern = $path;
           $this->params = $params;
           break;
         }
@@ -63,14 +52,15 @@ class Router {
     if (empty($this->pattern)) {
       return false;
     }
+
     $this->method = $this->meta['method'];
-    $annos = $this->router[$target]['_annos'];
-    if (empty($annos) || !is_array($annos) || !isset($annos[$this->method])) {
-      $this->annos = null;
-    } else {
-      $this->annos = $annos[$this->method];
-    }
-    $this->paramsSize = isset($this->meta['paramsSize']) ? $this->meta['paramsSize'] - 0 : 0;
+    $classInfo = $this->router['class'][$this->meta['class']];
+    $this->file = $classInfo['file'];
+    $this->class = $classInfo['class'];
+    $this->classAnnos = $classInfo['annos'];
+    $this->paramsSize = $this->meta['paramsSize'];
+    $this->annos = $this->meta['annos'];
+
     return true;
   }
 
@@ -96,7 +86,7 @@ class Router {
         return;
       }
     }
-    if (isset($meta['paramsSize']) && count($params) != ($meta['paramsSize'])-1) {
+    if (count($params) != ($meta['paramsSize'])) {
       return;
     }
     return $params;

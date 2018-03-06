@@ -6,19 +6,17 @@ abstract class Controller extends \QKPHP\Web\Object {
 
   //Section init
   protected $application;
-  protected $annotation = array();
   protected $request;
+  protected $router;
 
-  public function init ($application, $request, $annotation=null) {
+  public function init ($application, $request, $router) {
     $this->application = $application;
     $this->request = $request;
-    if (is_array($annotation)) {
-      $this->annotation = $annotation;
-    }
+    $this->router = $router;
   }
 
   //Section lifecycle
-  public function beforeCall($request) {
+  public function beforeCall() {
     return true;
   }
 
