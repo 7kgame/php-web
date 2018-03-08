@@ -32,7 +32,7 @@ abstract class GeneralDao extends QKObject {
       $this->mysqlFieldName = 'mysql:'.$this->mysqlConf['host'].','.$this->mysqlConf['port'];
     }
     if (!empty($this->mysqlFieldName)) {
-      $this->registerObject($this->mysqlFieldName,
+      $this->registerGlobalObject($this->mysqlFieldName,
         '\QKPHP\Web\Dao\Plugins\Mysql\Mysql',
         $this->mysqlConf);
     }
@@ -44,7 +44,7 @@ abstract class GeneralDao extends QKObject {
       $this->redisFieldName = 'redis:'.$this->redisConf['host'].','.$this->redisConf['port'];
     }
     if (!empty($this->redisFieldName)) {
-      $this->registerObject($this->redisFieldName,
+      $this->registerGlobalObject($this->redisFieldName,
         '\QKPHP\Web\Dao\Plugins\Redis\Redis',
         $this->redisConf);
     }
