@@ -87,47 +87,6 @@ class Application {
     die();
   }
 
-  // all instance container, packageName => instance
-  private $objectContainer = array();
-  // fieldName => packageName
-  private $fieldObjectContainer = array();
-
-  public function registerObject($fieldName, $packageName, array $config=null) {
-    if (empty($fieldName) || empty($packageName)) {
-      return;
-    }
-    if (isset($this->fieldObjectContainer[$fieldName])) {
-      return;
-    }
-    if (!empty($config)) {
-      $packageName = array($packageName, $config);
-    }
-    $this->fieldObjectContainer[$fieldName] = $packageName;
-    $this->objectContainer[$packageName] = $packageName;
-  }
-
-  public function getObject($fieldName) {
-    if (!isset($this->fieldObjectContainer[$fieldName])) {
-      return null;
-    }
-    $packageName = $this->fieldObjectContainer[$fieldName];
-    $config = null;
-    if (is_array($packageName)) {
-      $config = $packageName[1];
-      $packageName = $packageName[0];
-    }
-    $ins = $this->objectContainer[$packageName];
-    if (is_string($ins)) {
-      if (empty($config)) {
-        $ins = new $ins;
-      } else {
-        $ins = new $ins($config);
-      }
-      $this->objectContainer[$packageName] = $ins;
-    }
-    return $this->objectContainer[$packageName];
-  }
-
   public function getRouterPath () {
     return $this->webroot . DIRECTORY_SEPARATOR . $this->routerDir;
   }
