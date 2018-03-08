@@ -39,15 +39,36 @@ abstract class QKObject {
     }
     list($ins, $args) = $this->objectContainer[$fieldName];
     if (is_string($ins)) {
-      if (empty($args)) {
-        $ins = new $ins;
-      } else {
-        if (version_compare(PHP_VERSION, '5.6.0') >= 0) {
-          $ins = new $ins(...$args);
-        } else {
-          $cls = new \ReflectionClass($ins);
-          $ins = $cls->newInstanceArgs($args);
-        }
+      $argsLen = empty($args) ? 0 : count($args);
+      switch ($argsLen) {
+        case 0:
+          $ins = new $ins;
+          break;
+        case 1:
+          $ins = new $ins($args[0]);
+          break;
+        case 2:
+          $ins = new $ins($args[0], $args[1]);
+          break;
+        case 3:
+          $ins = new $ins($args[0], $args[1], $args[2]);
+          break;
+        case 4:
+          $ins = new $ins($args[0], $args[1], $args[2], $args[3]);
+          break;
+        case 5:
+          $ins = new $ins($args[0], $args[1], $args[2], $args[3], $args[4]);
+          break;
+        case 6:
+          $ins = new $ins($args[0], $args[1], $args[2], $args[3], $args[4], $args[5]);
+          break;
+        default:
+          if (version_compare(PHP_VERSION, '5.6.0') >= 0) {
+            $ins = new $ins(...$args);
+          } else {
+            $cls = new \ReflectionClass($ins);
+            $ins = $cls->newInstanceArgs($args);
+          }
       }
       $this->objectContainer[$fieldName][0] = $ins;
     }
