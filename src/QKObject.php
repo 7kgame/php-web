@@ -12,7 +12,7 @@ abstract class QKObject {
    * use func_get_args to support php 5.3
    * the param mode is: ($fieldName, $packageName, ...$args)
    */
-  protected function registerObject0(array $args, $isGlobal=false) {
+  private function registerObject0(array $args, $isGlobal=false) {
     if (count($args) < 2) {
       return;
     }
@@ -39,7 +39,7 @@ abstract class QKObject {
     }
   }
 
-  private function registerObject () {
+  protected function registerObject () {
     $this->registerObject0(func_get_args());
   }
 
@@ -51,7 +51,7 @@ abstract class QKObject {
     if(isset($this->$fieldName)) {
       return $this->$fieldName;
     }
-    if (!isset($this->objectContainer[$fieldName]) || !isset(self::$globalObjectContainer[$fieldName])) {
+    if (!isset($this->objectContainer[$fieldName]) && !isset(self::$globalObjectContainer[$fieldName])) {
       return null;
     }
     $ins = null;
