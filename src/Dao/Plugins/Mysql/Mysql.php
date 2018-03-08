@@ -1,7 +1,9 @@
 <?php
 namespace QKPHP\Web\Dao\Plugins\Mysql;
 
-class Mysql {
+use QKPHP\Web\Dao\Plugins\iPluginDao;
+
+class Mysql implements iPluginDao {
 
   private $host;
   private $port;
