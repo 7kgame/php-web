@@ -165,20 +165,34 @@ class Router {
     if (file_exists($routerFile)) {
       $routerInfo = require($routerFile);
     }
+    $classAnnos = null;
+    if (!empty($annos['class'])) {
+      $classAnnos = array();
+      foreach ($annos['class'] as $k=>$v) {
+        $classAnnos[$k] = $v;
+      }
+    }
     $routerInfo['class'][$classRelativePath] = array(
       'file'  => $classRelativePath . '.php',
       'class' => $className,
-      'annos' => empty($annos['class']) ? null : $annos['class']
+      'annos' => $classAnnos
     );
     foreach ($annos['method'] as $methodInfo) {
       if (!isset($routerInfo[$methodInfo['requestMethod']])) {
         $routerInfo[$methodInfo['requestMethod']] = array();
       }
+      $methodAnnos = null;
+      if (!empty($methodInfo['annos'])) {
+        $methodAnnos = array();
+        foreach ($methodInfo['annos'] as $k=>$v) {
+          $methodAnnos[$k] = $v;
+        }
+      }
       $routerInfo[$methodInfo['requestMethod']][$methodInfo['path']] = array(
         'class' => $classRelativePath,
         'method' => $methodInfo['method'],
         'paramsSize' => $methodInfo['paramsSize'],
-        'annos' => empty($methodInfo['annos']) ? null : $methodInfo['annos']
+        'annos' => $methodAnnos
       );
     }
     $out = "<?php\nreturn " . var_export($routerInfo, true) . ";\n";
