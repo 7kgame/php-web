@@ -168,8 +168,8 @@ class Router {
     $classAnnos = null;
     if (!empty($annos['class'])) {
       $classAnnos = array();
-      foreach ($annos['class'] as $k=>$v) {
-        $classAnnos[$k] = $v;
+      foreach ($annos['class'] as $anno) {
+        $classAnnos[$anno[0]] = $anno[1];
       }
     }
     $routerInfo['class'][$classRelativePath] = array(
@@ -184,8 +184,8 @@ class Router {
       $methodAnnos = null;
       if (!empty($methodInfo['annos'])) {
         $methodAnnos = array();
-        foreach ($methodInfo['annos'] as $k=>$v) {
-          $methodAnnos[$k] = $v;
+        foreach ($methodInfo['annos'] as $anno) {
+          $methodAnnos[$anno[0]] = $anno[1];
         }
       }
       $routerInfo[$methodInfo['requestMethod']][$methodInfo['path']] = array(
