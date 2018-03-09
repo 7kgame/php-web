@@ -23,6 +23,23 @@ abstract class Controller extends QKObject {
   }
 
   public function afterCall($response) {
+    if (empty($response)) {
+      return;
+    }
+    $annos = $this->router->annos;
+    $responseType = 'json';
+    if (!empty($annos) && isset($annos['reponsetype'])) {
+      $responseType = strtolower($annos['reponsetype']);
+    }
+    if (is_array($response) || $responseType == 'json') {
+      header('Content-Type: application/json');
+      $response = json_encode($response);
+      $callback = $this->request->get('callback');
+      if (!empty($callback)) {
+        $response = $callback . "($response)";
+      }
+    }
+    echo $response;
   }
 
   //Section view
