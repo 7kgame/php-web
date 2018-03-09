@@ -29,7 +29,7 @@ abstract class GeneralDao extends QKObject {
 
   private function registerMysql () {
     if (!empty($this->mysqlConf)) {
-      $this->mysqlFieldName = 'mysql:'.$this->mysqlConf['host'].','.$this->mysqlConf['port'];
+      $this->mysqlFieldName = 'mysql:'.$this->mysqlConf['host'].','.$this->mysqlConf['port'].','.$this->mysqlConf['user'];
     }
     if (!empty($this->mysqlFieldName)) {
       $this->registerGlobalObject($this->mysqlFieldName,
