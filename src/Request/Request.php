@@ -61,10 +61,12 @@ class Request {
       return $default;
     }
     $value = $this->params[$key];
-    if ($type != 'int') {
-      return $value;
-    } else {
+    if ($type == 'int') {
       return Url::processRequestValue($value, true);
+    } else if ($type == 'bool') {
+      return !!$value;
+    } else {
+      return $value;
     }
   }
 
@@ -74,6 +76,10 @@ class Request {
 
   public function getStr($key, $default="") {
     return $this->get($key, $default, 'string');
+  }
+
+  public function getBool($key, $default=false) {
+    return $this->get($key, $default, 'bool');
   }
 
 }

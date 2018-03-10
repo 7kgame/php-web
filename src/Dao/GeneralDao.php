@@ -8,58 +8,95 @@ abstract class GeneralDao extends QKObject {
 
   private $isMaster = false;
 
-  private $mysqlConf;
-  private $redisConf;
-  private $mysqlFieldName;
-  private $redisFieldName;
+  private $masterMysqlConf;
+  private $slaverMysqlConf;
+  private $masterRedisConf;
+  private $slaverRedisConf;
 
   public function __construct ($isMaster=false, array $mysqlConf=null, array $redisConf=null) {
     $this->isMaster  = $isMaster;
-    $this->mysqlConf = $mysqlConf;
-    $this->redisConf = $redisConf;
+    $this->setMysqlConf($mysqlConf);
+    $this->setRedisConf($redisConf);
   }
 
   public function setMysqlConf (array $mysqlConf=null) {
-    $this->mysqlConf = $mysqlConf;
+    if (empty($mysqlConf)) {
+      return;
+    }
+    if (isset($mysqlConf['host'])) {
+      if ($this->isMaster) {
+        $this->masterMysqlConf = $mysqlConf;
+      } else {
+        $this->slaverMysqlConf = $mysqlConf;
+      }
+    } else {
+      if ($this->isMaster && isset($mysqlConf['master'])) {
+        $this->masterMysqlConf = $mysqlConf['master'];
+      }
+      if (!$this->isMaster && isset($mysqlConf['slaver'])) {
+        $this->slaverMysqlConf = $mysqlConf['slaver'];
+      }
+    }
   }
 
   public function setRedisConf (array $redisConf=null) {
-    $this->redisConf = $redisConf;
+    if (empty($redisConf)) {
+      return;
+    }
+    if (isset($redisConf['host'])) {
+      if ($this->isMaster) {
+        $this->masterRedisConf = $redisConf;
+      } else {
+        $this->slaverRedisConf = $redisConf;
+      }
+    } else {
+      if ($this->isMaster && isset($redisConf['master'])) {
+        $this->masterRedisConf = $redisConf['master'];
+      }
+      if (!$this->isMaster && isset($redisConf['slaver'])) {
+        $this->slaverRedisConf = $redisConf['slaver'];
+      }
+    }
   }
 
   private function registerMysql () {
-    if (!empty($this->mysqlConf)) {
-      $this->mysqlFieldName = 'mysql:'.$this->mysqlConf['host'].','.$this->mysqlConf['port'].','.$this->mysqlConf['user'];
+    $conf = null;
+    if ($this->isMaster) {
+      $conf = $this->masterMysqlConf;
+    } else {
+      $conf = empty($this->slaverMysqlConf) ? $this->masterMysqlConf : $this->slaverMysqlConf;
     }
-    if (!empty($this->mysqlFieldName)) {
-      $this->registerGlobalObject($this->mysqlFieldName,
-        '\QKPHP\Web\Dao\Plugins\Mysql\Mysql',
-        $this->mysqlConf);
+    if (empty($conf)) {
+      throw new \Exception('mysql conf for '.($this->isMaster ? 'master' : 'slaver').' is not exist.');
     }
+    $fieldName = 'mysql:'.$conf['host'].','.$conf['port'].','.$conf['user'];
+    $this->registerGlobalObject($fieldName, '\QKPHP\Web\Dao\Plugins\Mysql\Mysql', $conf);
+    return $fieldName;
   }
 
   private function registerRedis () {
-    if (!empty($this->redisConf)) {
-      $this->redisConf = $this->redisConf;
-      $this->redisFieldName = 'redis:'.$this->redisConf['host'].','.$this->redisConf['port'];
+    $conf = null;
+    if ($this->isMaster) {
+      $conf = $this->masterRedisConf;
+    } else {
+      $conf = empty($this->slaverRedisConf) ? $this->masterRedisConf: $this->slaverRedisConf;
     }
-    if (!empty($this->redisFieldName)) {
-      $this->registerGlobalObject($this->redisFieldName,
-        '\QKPHP\Web\Dao\Plugins\Redis\Redis',
-        $this->redisConf);
+    if (empty($conf)) {
+      throw new \Exception('redis conf for '.($this->isMaster ? 'master' : 'slaver').' is not exist.');
     }
+    $fieldName = 'redis:'.$conf['host'].','.$conf['port'];
+    $this->registerGlobalObject($fieldName, '\QKPHP\Web\Dao\Plugins\Redis\Redis', $conf);
+    return $fieldName;
   }
 
   public function getMysql () {
-    $this->registerMysql();
-    $mysqlFieldName = $this->mysqlFieldName;
-    return $this->$mysqlFieldName;
+    $fieldName = $this->registerMysql();
+    return $this->$fieldName;
   }
 
-  public function getReids () {
-    $this->registerRedis();
-    $redisFieldName = $this->redisFieldName;
-    return $this->$redisFieldName;
+  public function getRedis () {
+    $fieldName = $this->registerRedis();
+    return $this->$fieldName;
   }
 
   public function checkWritable () {
@@ -83,6 +120,9 @@ abstract class GeneralDao extends QKObject {
   public function create (array $fields, array $data, $multi=false) {
     $this->checkWritable();
     list($dbName, $tblName) = $this->getDbNameAndTblName();
+    if (empty($dbName) || empty($tblName)) {
+      throw new \Exception('dbName or tableName can\'t be empty');
+    }
     return $this->getMysql()->create($dbName, $tblName, $fields, $data, $multi);
   }
 
@@ -102,6 +142,9 @@ abstract class GeneralDao extends QKObject {
   public function updateByCondition (array $fields, array $params, array $condition) {
     $this->checkWritable();
     list($dbName, $tblName) = $this->getDbNameAndTblName();
+    if (empty($dbName) || empty($tblName)) {
+      throw new \Exception('dbName or tableName can\'t be empty');
+    }
     return $this->getMysql()->updateByCondition($dbName, $tblName, $fields, $params, $condition);
   }
 
@@ -113,10 +156,18 @@ abstract class GeneralDao extends QKObject {
   public function deleteEntity (array $condition) {
     $this->checkWritable();
     list($dbName, $tblName) = $this->getDbNameAndTblName();
+    if (empty($dbName) || empty($tblName)) {
+      throw new \Exception('dbName or tableName can\'t be empty');
+    }
     return $this->getMysql()->deleteByCondition($dbName, $tblName, $condition);
   } 
 
-  abstract protected function getDbNameAndTblName();
-  abstract protected function getPrimaryKey();
+  protected function getDbNameAndTblName() {
+    return array('', '');
+  }
+
+  protected function getPrimaryKey() {
+    return '';
+  }
 
 }
