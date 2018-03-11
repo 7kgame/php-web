@@ -130,4 +130,55 @@ abstract class Entity {
       }
     }
   }
+
+  /**
+   *  return array(status, errorCodes, errorMsgs)
+   */
+  public function validate($action="") {
+    $status = true;
+    $errorCodes = array();
+    $errorMsgs = array();
+    if(empty($this->validateFields)) {
+      return array(false, $errorCodes, $errorMsgs);
+    }
+
+    if(empty($action)) {
+      $action = self::$defaultActionName;
+    }
+    if (!isset($this->rules[$action])) {
+      return array(false, $errorCodes, $errorMsgs);
+    }
+
+    foreach($rules as $field => $validatorInfo) {
+      if(!isset($this->validateFields[$field])) {
+        continue;
+      }
+      foreach($validatorInfo as $validator => $params) {
+        if ($validator === '_') {
+          $st = true;
+          $val = $this->$field;
+        } else {
+          if (substr($validator, 0, 1) != '\\') {
+            $validator = "\\QKPHP\Web\\Validator\\Rules\\".$validator;
+          }
+          list($st, $val) = $validator::validator($this->$field, $params["args"]);
+        }
+        if(!$st) {
+          $status = false;
+          $errorCodes[] = $params['code'];
+          $errorMsgs[] = $params['msg'];
+          break;
+        } else {
+          $this->$field = $val;
+        }
+      }
+
+      if ($status) {
+        return array(true, null, null);
+      } else {
+        return array(false, $result, $errorMsgs);
+      }
+    }
+  }
+
 }
