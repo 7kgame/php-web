@@ -47,8 +47,8 @@ abstract class Entity {
     $this->set($field, $value);
   }
 
-  public function toArray($useValidate=false) {
-    if($useValidate) {
+  public function toArray($useValidateField=false) {
+    if($useValidateField) {
       $data = array();
       foreach($this->kvmap as $k=>$v) {
         if(isset($this->validateFields[$k])) {
