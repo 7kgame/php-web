@@ -83,6 +83,15 @@ abstract class Entity {
     }
   }
 
+  /**
+   * $action: the name of one validator group
+   * $field: entity field name
+   * $validator: validator package or name, use '_' to auto set field value without validate. eg: \QKPHP\Web\Validator\Rules\Length
+   * $args: the arguments of this validator
+   * $errorMsg
+   * $errorCodes
+   *
+   */
   protected function addValidator($action, $field, $validator='_', $args=null, $errorMsg=null, $errorCode=null) {
     if ($errorCode === null) {
       $errorCode = $field;
