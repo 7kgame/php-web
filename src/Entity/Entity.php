@@ -9,7 +9,6 @@ abstract class Entity {
 
   private static $defaultActionName = "default";
   private $rules = array();
-  private $baseRules = array();
 
   protected $validateFields = array();
 
@@ -48,8 +47,8 @@ abstract class Entity {
     $this->set($field, $value);
   }
 
-  public function toArray($withValidate=false) {
-    if($withValidate) {
+  public function toArray($useValidate=false) {
+    if($useValidate) {
       $data = array();
       foreach($this->kvmap as $k=>$v) {
         if(isset($this->validateFields[$k])) {
@@ -62,7 +61,7 @@ abstract class Entity {
     }
   }
 
-  public function toModel($data) {
+  public function toEntity($data) {
     foreach($data as $k=>$v) {
       if(isset($this->kvmap[$k])) {
         $this->kvmap[$k] = $v;
