@@ -181,9 +181,6 @@ class Router {
       'annos' => $classAnnos
     );
     foreach ($annos['method'] as $methodInfo) {
-      if (!isset($routerInfo[$methodInfo['requestMethod']])) {
-        $routerInfo[$methodInfo['requestMethod']] = array();
-      }
       $methodAnnos = null;
       if (!empty($methodInfo['annos'])) {
         $methodAnnos = array();
@@ -191,12 +188,22 @@ class Router {
           $methodAnnos[$anno[0]] = $anno[1];
         }
       }
-      $routerInfo[$methodInfo['requestMethod']][$methodInfo['path']] = array(
+      $methodItem = array(
         'class' => $classRelativePath,
         'method' => $methodInfo['method'],
         'paramsSize' => $methodInfo['paramsSize'],
         'annos' => $methodAnnos
       );
+      foreach(explode('|', $methodInfo['requestMethod']) as $rm) {
+        $rm = trim($rm);
+        if (empty($rm)) {
+          continue;
+        }
+        if (!isset($routerInfo[$rm])) {
+          $routerInfo[$rm] = array();
+        }
+        $routerInfo[$rm][$methodInfo['path']] = $methodItem;
+      }
     }
     $out = "<?php\nreturn " . var_export($routerInfo, true) . ";\n";
     file_put_contents($routerFile, $out);
