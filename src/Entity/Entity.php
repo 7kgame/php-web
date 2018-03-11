@@ -52,9 +52,9 @@ abstract class Entity {
     if($withValidate) {
       $data = array();
       foreach($this->kvmap as $k=>$v) {
-        //if(isset($this->validateFields[$k])) {
+        if(isset($this->validateFields[$k])) {
           $data[$k] = $v;
-        //}
+        }
       }
       return $data;
     } else {
