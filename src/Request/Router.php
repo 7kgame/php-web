@@ -23,6 +23,11 @@ class Router {
     $routerFile = $routerDir . DIRECTORY_SEPARATOR . $routerName . '.php';
     if (is_file($routerFile)) {
       $this->router = require($routerFile);
+    } else {
+      $routerName = '_';
+      $this->target = $routerName;
+      $routerFile = $routerDir . DIRECTORY_SEPARATOR . $routerName . '.php';
+      $this->router = require($routerFile);
     }
   }
 

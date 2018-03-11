@@ -46,6 +46,9 @@ class Router {
     }
     $files = Utils::rdir($controllerDir);
     Utils::delDir($routerDir, false);
+    $out = "<?php\nreturn array();\n";
+    $defaultRouterFile = $routerDir . DIRECTORY_SEPARATOR . '_.php';
+    file_put_contents($defaultRouterFile, $out);
     foreach ($files as $file) {
       if (substr($file, -4) != '.php') {
         continue;
