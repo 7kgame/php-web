@@ -129,4 +129,80 @@ abstract class Controller extends QKObject {
     $transacationService->rollBackGlobal();
   }
 
+  /**
+   * $fieldFilter: 0 返回action定义的fields
+   *               1 返回entity定义的fields
+   *               2 返回action定义的fields与post fields的交集
+   */
+  protected function validator($entity, $action = "default", $fieldFilter = 0, $options=null) {
+    if (is_string($entity)) {
+      $entity = new $entity;
+    }
+    $entity->initValidator($options);
+    if ($fieldFilter == 1) {
+      $v = $entity->toArray();
+      $fields = array_keys($v);
+    } else {
+      $fields = $entity->getValidatorField($action);
+    }
+    if (empty($fields)) {
+      return array(false, null, null);
+    }
+    foreach ($fields as $field) {
+      $value = $this->request->getStr($field, null);
+      if ($value === null && $fieldFilter == 2) {
+        continue;
+      }
+      $entity->set($field, $value);
+    }
+    list($status, $result, $msg) = $entity->validate($action);
+    return array($status, $result, $msg, $entity);
+  }
+
+  protected function multiValidator($entity, $action = "default", $fieldFilter = 0, $options=null) {
+    if (is_string($entity)) {
+      $entity = new $entity;
+    }
+    $entity->initValidator($options);
+    if ($fieldFilter == 1) {
+      $v = $entity->toArray();
+      $fields = array_keys($v);
+    } else {
+      $fields = $entity->getValidatorField($action);
+    }
+    if (empty($fields)) {
+      return array(false, null, null);
+    }
+    $entitys = array();
+    foreach ($fields as $field) {
+      $values = $this->request->get($field);
+      if ($values === null && $fieldFilter == 2) {
+        continue;
+      }
+      for ($i = 0; $i < count($values); $i++) {
+        if (!isset($entitys[$i])) {
+          $entitys[$i] = clone $entity;
+        }
+        $entitys[$i]->set($field, $values[$i]);
+      }
+    }
+    $result = array();
+    $msg = array();
+    $status = true;
+
+    foreach ($entitys as $e) {
+      list($s, $c, $m) = $e->validate($action);
+      if (!$s) {
+        $status = false;
+      }
+      $result[] = $c;
+      $msg[] = $m;
+    }
+    if (empty($entitys)) {
+      $this->failedResponse("", "");
+      exit;
+    }
+    return array($status, $result, $msg, $entitys);
+  }
+
 }

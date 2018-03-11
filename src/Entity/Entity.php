@@ -20,7 +20,6 @@ abstract class Entity {
         $this->kvmap[$k] = $v;
       }
     }
-    $this->initValidator();
   }
 
   public function get($field) {
@@ -70,7 +69,7 @@ abstract class Entity {
     return $this;
   }
 
-  abstract protected function initValidator($extends);
+  abstract protected function initValidator($options);
   abstract protected function getStaticMessageMap();
 
   public function getMessage($code) {
@@ -147,14 +146,14 @@ abstract class Entity {
     $errorCodes = array();
     $errorMsgs = array();
     if(empty($this->validateFields)) {
-      return array(false, $errorCodes, $errorMsgs);
+      return array(false, null, null);
     }
 
     if(empty($action)) {
       $action = self::$defaultActionName;
     }
     if (!isset($this->rules[$action])) {
-      return array(false, $errorCodes, $errorMsgs);
+      return array(false, null, null);
     }
 
     foreach($rules as $field => $validatorInfo) {
