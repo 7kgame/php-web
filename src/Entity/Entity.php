@@ -76,7 +76,7 @@ abstract class Entity {
   public function getMessage($code) {
     $code = "$code";
     $messageMap = $this->getStaticMessageMap();
-    if(isset($messageMap[$code])) {
+    if(!empty($messageMap) && isset($messageMap[$code])) {
       return $messageMap[$code];
     } else {
       return '';
@@ -90,7 +90,7 @@ abstract class Entity {
    * $args: the arguments of this validator
    * $errorMsg
    * $errorCodes
-   *
+   * TODO field 支持多validator
    */
   protected function addValidator($action, $field, $validator='_', $args=null, $errorMsg=null, $errorCode=null) {
     if ($errorCode === null) {
