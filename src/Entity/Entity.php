@@ -69,8 +69,8 @@ abstract class Entity {
     return $this;
   }
 
-  abstract protected function initValidator($options);
-  abstract protected function getStaticMessageMap();
+  abstract public function initValidator($options);
+  abstract public function getStaticMessageMap();
 
   public function getMessage($code) {
     $code = "$code";
@@ -80,6 +80,16 @@ abstract class Entity {
     } else {
       return '';
     }
+  }
+
+  public function getValidatorField($action="") {
+    if(empty($action)) {
+      $action = self::$defaultActionName;
+    }
+    if (!isset($this->rules[$action])) {
+      return null;
+    }
+    return array_keys($this->rules[$action]);
   }
 
   /**
@@ -156,7 +166,7 @@ abstract class Entity {
       return array(false, null, null);
     }
 
-    foreach($rules as $field => $validatorInfo) {
+    foreach($this->rules[$action] as $field => $validatorInfo) {
       if(!isset($this->validateFields[$field])) {
         continue;
       }
@@ -172,19 +182,18 @@ abstract class Entity {
         }
         if(!$st) {
           $status = false;
-          $errorCodes[] = $params['code'];
+          $errorCodes[] = empty($params['code']) ? $field : $params['code'];
           $errorMsgs[] = $params['msg'];
           break;
         } else {
           $this->$field = $val;
         }
       }
-
-      if ($status) {
-        return array(true, null, null);
-      } else {
-        return array(false, $result, $errorMsgs);
-      }
+    }
+    if ($status) {
+      return array(true, null, null);
+    } else {
+      return array(false, $errorCodes, $errorMsgs);
     }
   }
 

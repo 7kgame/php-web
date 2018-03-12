@@ -134,7 +134,7 @@ abstract class Controller extends QKObject {
    *               1 返回entity定义的fields
    *               2 返回action定义的fields与post fields的交集
    */
-  protected function validator($entity, $action = "default", $fieldFilter = 0, $options=null) {
+  protected function validate($entity, $action = "default", $fieldFilter = 0, $options=null) {
     if (is_string($entity)) {
       $entity = new $entity;
     }
@@ -146,7 +146,7 @@ abstract class Controller extends QKObject {
       $fields = $entity->getValidatorField($action);
     }
     if (empty($fields)) {
-      return array(false, null, null);
+      return array(false, null, null, null);
     }
     foreach ($fields as $field) {
       $value = $this->request->getStr($field, null);
@@ -155,11 +155,11 @@ abstract class Controller extends QKObject {
       }
       $entity->set($field, $value);
     }
-    list($status, $result, $msg) = $entity->validate($action);
-    return array($status, $result, $msg, $entity);
+    list($status, $errorCodes, $errorMsgs) = $entity->validate($action);
+    return array($status, $errorCodes, $errorMsgs, $entity);
   }
 
-  protected function multiValidator($entity, $action = "default", $fieldFilter = 0, $options=null) {
+  protected function multiValidate($entity, $action = "default", $fieldFilter = 0, $options=null) {
     if (is_string($entity)) {
       $entity = new $entity;
     }
@@ -171,7 +171,7 @@ abstract class Controller extends QKObject {
       $fields = $entity->getValidatorField($action);
     }
     if (empty($fields)) {
-      return array(false, null, null);
+      return array(false, null, null, null);
     }
     $entitys = array();
     foreach ($fields as $field) {
@@ -186,8 +186,8 @@ abstract class Controller extends QKObject {
         $entitys[$i]->set($field, $values[$i]);
       }
     }
-    $result = array();
-    $msg = array();
+    $errorCodes = array();
+    $errorMsgs = array();
     $status = true;
 
     foreach ($entitys as $e) {
@@ -195,14 +195,13 @@ abstract class Controller extends QKObject {
       if (!$s) {
         $status = false;
       }
-      $result[] = $c;
-      $msg[] = $m;
+      $errorCodes[] = $c;
+      $errorMsgs[] = $m;
     }
     if (empty($entitys)) {
-      $this->failedResponse("", "");
-      exit;
+      return array(false, null, null, null);
     }
-    return array($status, $result, $msg, $entitys);
+    return array($status, $errorCodes, $errorMsgs, $entitys);
   }
 
 }

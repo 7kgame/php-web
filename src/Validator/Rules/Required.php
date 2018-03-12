@@ -5,26 +5,19 @@ use QKPHP\Web\Validator\Validator;
 
 class Required extends Validator {
 
-  /**
-   *  args = false for reserving the field
-   */
-  public static function validator($value, array $args=null) {
-    $required = true;
-    if($args && isset($args[0])) {
-      $required = $args[0];
-    }
+  public static function validator($value, $args=null) {
     $isOk = true;
     if(is_array($value)) {
       if(empty($value)) {
-        $isOk = !$required;
+        $isOk = false;
       }
     } else {
       if($value === null) {
-        $isOk = !$required;
+        $isOk = false;
       } else {
         $value = trim($value);
         if(strlen($value) < 1) {
-          $isOk = !$required;
+          $isOk = false;
         }
       }
     }
