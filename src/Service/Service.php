@@ -61,4 +61,40 @@ abstract class Service extends QKObject {
     return $dao;
   }
 
+  private function getDao4Inner ($fieldName, $isMaster=false) {
+    if (empty($fieldName)) {
+      return $this->getDao($isMaster);
+    } else {
+      return $this->getOtherDao($fieldName, $isMaster);
+    }
+  }
+
+  public function insertEntity(array $fields, array $data, $multi=false, $getId=true, $fieldName=null) {
+    return $this->getDao4Inner($fieldName, true)->insertEntity($fields, $data, $multi, $getId);
+  }
+
+  public function set ($id, array $fields, array $params, $fieldName=null) {
+    return $this->getDao4Inner($fieldName, true)->set($id, $fields, $params);
+  }
+
+  public function get ($id, array $fields=null, $withLock=false, $fieldName=null) {
+    return $this->getDao4Inner($fieldName)->get($id, $fields, $withLock);
+  }
+
+  public function getEntity (array $condition, array $fields=null, $withLock=false, $fieldName=null) {
+    return $this->getDao4Inner($fieldName)->getEntity($condition, $fields, $withLock);
+  }
+
+  public function getEntities (array $condition, array $fields=null, $limit=-1, $withLock=false, $fieldName=null) {
+    return $this->getDao4Inner($fieldName)->getEntities($condition, $fields, $limit, $withLock);
+  }
+
+  public function updateEntity (array $fields, array $params, array $condition, $fieldName=null) {
+    return $this->getDao4Inner($fieldName, true)->updateEntity($fields, $params, $condition);
+  }
+
+  public function deleteEntity (array $condition, $fieldName=null) {
+    return $this->getDao4Inner($fieldName, true)->deleteEntity($condition);
+  }
+
 }

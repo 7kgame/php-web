@@ -55,7 +55,7 @@ class Mysql implements iPluginDao {
     $this->mysql->rollBack();
   }
 
-  public function create ($db, $tbl, array $fields, array $data, $multi=false) {
+  public function insert ($db, $tbl, array $fields, array $data, $multi=false) {
     if(!$multi) {
       $data = array($data);
     }
@@ -191,7 +191,11 @@ class Mysql implements iPluginDao {
   }
 
   public function lastInsertId() {
-    return $this->mysql->lastInsertId();
+    $id = $this->mysql->lastInsertId();
+    if ($id < 1) {
+      $id = 0;
+    }
+    return $id;
   }
 
 }

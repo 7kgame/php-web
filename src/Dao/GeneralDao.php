@@ -117,13 +117,12 @@ abstract class GeneralDao extends QKObject {
     return $this->getMysql()->rollBack();
   }
 
-  public function create (array $fields, array $data, $multi=false) {
+  public function insert ($dbName, $tblName, array $fields, array $data, $multi=false) {
     $this->checkWritable();
-    list($dbName, $tblName) = $this->getDbNameAndTblName();
     if (empty($dbName) || empty($tblName)) {
       throw new \Exception('dbName or tableName can\'t be empty');
     }
-    return $this->getMysql()->create($dbName, $tblName, $fields, $data, $multi);
+    return $this->getMysql()->insert($dbName, $tblName, $fields, $data, $multi);
   }
 
   public function fetch ($sql, array $params=null) {
@@ -139,9 +138,8 @@ abstract class GeneralDao extends QKObject {
     return $this->getMysql()->updateBySql($sql, $params);
   }
 
-  public function updateByCondition (array $fields, array $params, array $condition) {
+  public function updateByCondition ($dbName, $tblName, array $fields, array $params, array $condition) {
     $this->checkWritable();
-    list($dbName, $tblName) = $this->getDbNameAndTblName();
     if (empty($dbName) || empty($tblName)) {
       throw new \Exception('dbName or tableName can\'t be empty');
     }
@@ -151,6 +149,76 @@ abstract class GeneralDao extends QKObject {
   public function deleteBySql ($sql, array $params) {
     $this->checkWritable();
     return $this->getMysql()->deleteBySql($sql, $params);
+  }
+
+  public function insertEntity (array $fields, array $data, $multi=false, $getId=true) {
+    list($dbName, $tblName) = $this->getDbNameAndTblName();
+    $ret = $this->insert($dbName, $tblName, $fields, $data, $multi);
+    if(!$getId || !$ret) {
+      return !!$ret;
+    }
+    return $this->getMysql()->lastInsertId();
+  }
+
+  public function set($id, array $fields, array $params) {
+    $primaryKey = $this->getPrimaryKey();
+    if(empty($primaryKey)) {
+      return null;
+    }
+    return $this->updateEntity($fields, $params, array($primaryKey=>$id));
+  }
+
+  public function get($id, array $fields=null, $withLock=false) {
+    $primaryKey = $this->getPrimaryKey();
+    if(empty($primaryKey)) {
+      return null;
+    }
+    $condition = array($primaryKey=>$id);
+    return $this->getEntity($condition, $fields, $withLock);
+  }
+
+  public function getEntity(array $condition, array $fields=null, $withLock=false) {
+    return $this->getEntities($condition, $fields, 1, $withLock);
+  }
+
+  public function getEntities(array $condition, array $fields=null, $limit=-1, $withLock=false) {
+    list($dbName, $tblName) = $this->getDbNameAndTblName();
+    if (empty($dbName) || empty($tblName)) {
+      throw new \Exception('dbName or tableName can\'t be empty');
+    }
+    $limit = $limit - 0;
+    $sql = "select ";
+    if(empty($fields)) {
+      $sql .= " * ";
+    } else {
+      $sql .= implode(',', $fields);
+    }
+    $sql .= " from $dbName.$tblName";
+    $data = array();
+    if(!empty($condition)) {
+      list($where, $data) = $this->getMysql()->makeCondition($condition);
+      if(!empty($where)) {
+        $sql .= " where $where";
+      }
+    }
+    if ($limit > 1) {
+      $sql .= " limit $limit";
+    } else {
+      if($withLock) {
+        $sql .= " for update";
+      }
+    }
+    if ($limit == 1) {
+      return $this->fetch($sql, $data);
+    } else {
+      return $this->fetchAll($sql, $data);
+    }
+  }
+
+  public function updateEntity (array $fields, array $params, array $condition) {
+    $this->checkWritable();
+    list($dbName, $tblName) = $this->getDbNameAndTblName();
+    return $this->updateByCondition($dbName, $tblName, $fields, $params, $condition);
   }
 
   public function deleteEntity (array $condition) {
