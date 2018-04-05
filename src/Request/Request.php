@@ -56,11 +56,18 @@ class Request {
     return $this->params;
   }
 
-  public function get($key, $default=null, $type=null) {
+  public function getWithDefault($key, $default=null, $type=null) {
+    return $this->get($key, $default, $type, true);
+  }
+
+  public function get($key, $default=null, $type=null, $checkEmpty=false) {
     if (empty($this->params) || !isset($this->params[$key])) {
       return $default;
     }
     $value = $this->params[$key];
+    if (empty($value) && $checkEmpty) {
+      return $default;
+    }
     if ($type == 'int') {
       return Url::processRequestValue($value, true);
     } else if ($type == 'bool') {
