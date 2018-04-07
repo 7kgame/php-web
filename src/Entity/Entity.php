@@ -66,7 +66,7 @@ abstract class Entity {
     }
     foreach($data as $k=>$v) {
       if(isset($this->kvmap[$k])) {
-        $this->kvmap[$k] = $v;
+        $this->set($k, $v);
       }
     }
     return $this;

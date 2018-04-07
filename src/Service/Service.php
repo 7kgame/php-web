@@ -73,11 +73,18 @@ abstract class Service extends QKObject {
     return $this->_getDao($fieldName, true)->insertEntity($fields, $data, $multi, $getId);
   }
 
-  public function set ($id, array $fields, array $params, $fieldName=null) {
+  public function set ($id, $fields, $params, $fieldName=null) {
+    if (!is_array($fields)) {
+      $fields = array($fields);
+      $params = array($params);
+    }
     return $this->_getDao($fieldName, true)->set($id, $fields, $params);
   }
 
-  public function get ($id, array $fields=null, $withLock=false, $fieldName=null) {
+  public function get ($id, $fields=null, $withLock=false, $fieldName=null) {
+    if (!empty($fields) && !is_array($fields)) {
+      $fields = array($fields);
+    }
     return $this->_getDao($fieldName)->get($id, $fields, $withLock);
   }
 
