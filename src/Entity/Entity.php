@@ -10,12 +10,12 @@ abstract class Entity {
   private static $defaultActionName = "default";
   private $rules = array();
 
-  protected $validateFields = array();
+  protected $filledFields = array();
 
   public function __construct() {
     foreach($this->fields as $k=>$v) {
       if(is_numeric($k)) {
-        $this->kvmap[$v] = '';
+        $this->kvmap[$v] = 0;
       } else {
         $this->kvmap[$k] = $v;
       }
@@ -31,7 +31,7 @@ abstract class Entity {
 
   public function set($field, $value, $ignoreNull=true) {
     if(isset($this->kvmap[$field])) {
-      $this->validateFields[$field] = true;
+      $this->filledFields[$field] = true;
       if(!$ignoreNull || $value !== null) {
         $this->kvmap[$field] = $value;
       }
@@ -46,11 +46,11 @@ abstract class Entity {
     $this->set($field, $value);
   }
 
-  public function toArray($useValidateField=false) {
-    if($useValidateField) {
+  public function toArray($useFilled=true) {
+    if($useFilled) {
       $data = array();
       foreach($this->kvmap as $k=>$v) {
-        if(isset($this->validateFields[$k])) {
+        if(isset($this->filledFields[$k])) {
           $data[$k] = $v;
         }
       }
@@ -60,7 +60,10 @@ abstract class Entity {
     }
   }
 
-  public function toEntity($data) {
+  public function fill(array $data) {
+    if (empty($data)) {
+      return;
+    }
     foreach($data as $k=>$v) {
       if(isset($this->kvmap[$k])) {
         $this->kvmap[$k] = $v;
@@ -155,7 +158,7 @@ abstract class Entity {
     $status = true;
     $errorCodes = array();
     $errorMsgs = array();
-    if(empty($this->validateFields)) {
+    if(empty($this->filledFields)) {
       return array(false, null, null);
     }
 
@@ -167,7 +170,7 @@ abstract class Entity {
     }
 
     foreach($this->rules[$action] as $field => $validatorInfo) {
-      if(!isset($this->validateFields[$field])) {
+      if(!isset($this->filledFields[$field])) {
         continue;
       }
       foreach($validatorInfo as $validator => $params) {
