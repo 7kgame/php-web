@@ -140,7 +140,7 @@ abstract class Controller extends QKObject {
     }
     $entity->initValidator($options);
     if ($fieldFilter == 1) {
-      $v = $entity->toArray();
+      $v = $entity->toArray(false);
       $fields = array_keys($v);
     } else {
       $fields = $entity->getValidatorField($action);
@@ -165,7 +165,7 @@ abstract class Controller extends QKObject {
     }
     $entity->initValidator($options);
     if ($fieldFilter == 1) {
-      $v = $entity->toArray();
+      $v = $entity->toArray(false);
       $fields = array_keys($v);
     } else {
       $fields = $entity->getValidatorField($action);
