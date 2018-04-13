@@ -233,6 +233,7 @@ abstract class GeneralDao extends QKObject {
       'count' => $count,
       'page' => $page,
       'pagenum' => $pagenum,
+      'pagesize' => $limit,
       'datalist' => $datalist
     );
     return $datas;
