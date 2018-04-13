@@ -215,6 +215,77 @@ abstract class GeneralDao extends QKObject {
     }
   }
 
+  public function pagination($condition, $fields=array(), $page=1, $limit=20, $withLock = false, $order = array()){
+    $count = $this->listCount($condition);
+    $pagenum = 1;
+    $limit = $limit - 0;
+    $datalist = array();
+    if($count>0){
+      if($count%$limit == 0){
+        $pagenum = $count/$limit;
+      }else{
+        $pagenum = ceil($count/$limit);
+      }
+      $offset = ($page-1)*$limit;
+      $datalist = $this->getList($condition, $fields, $limit, $offset, $withLock, $order);
+    }
+    $datas = array(
+      'count' => $count,
+      'page' => $page,
+      'pagenum' => $pagenum,
+      'datalist' => $datalist
+    );
+    return $datas;
+  }
+
+  public function listCount($condition){
+    list($dbName, $tblName) = $this->getDbNameAndTblName();
+    $countSql = "select count(*) as count from $dbName.$tblName";
+    $params = array();
+    if(!empty($condition)) {
+      list($where, $params) = $this->getMysql()->makeCondition($condition);
+      if(!empty($where)) {
+        $countSql .= " where $where";
+      }
+    }
+    $result = $this->fetch($countSql,$params);
+    return $result['count'];
+  }
+
+  public function getList($condition, $fields=array(), $limit=20, $offset=0, $withLock = false, $order = array()){
+    list($dbName, $tblName) = $this->getDbNameAndTblName();
+    $sql = "select ";
+    if(empty($fields)) {
+      $sql .= " * ";
+    } else {
+      $sql .= implode(',', $fields);
+    }
+    $sql .= " from $dbName.$tblName";
+    $params = array();
+    if(!empty($condition)) {
+      list($where, $params) = $this->getMysql()->makeCondition($condition);
+      if(!empty($where)) {
+        $sql .= " where $where";
+      }
+    }
+    if(!empty($order)){
+      foreach($order as $sortField => $sort){
+        $sql .= " order by $sortField $sort";
+      }
+    }
+    if ($limit > 1) {
+      $sql .= " limit $limit";
+      if($offset>0){
+        $sql .= " offset $offset";
+      }
+    } else {
+      if($withLock) {
+        $sql .= " for update";
+      }
+    }
+    return $this->fetchAll($sql,$params);
+  }
+
   public function updateEntity (array $fields, array $params, array $condition) {
     $this->checkWritable();
     list($dbName, $tblName) = $this->getDbNameAndTblName();
