@@ -19,6 +19,11 @@ abstract class GeneralDao extends QKObject {
     $this->setRedisConf($redisConf);
   }
 
+  public function getApplication () {
+    global $_QK_APPLICATION_INS;
+    return $_QK_APPLICATION_INS;
+  }
+
   public function setMysqlConf (array $mysqlConf=null) {
     if (empty($mysqlConf)) {
       return;

@@ -14,6 +14,8 @@ class Application {
   const CONTROLLER_DIR = 'controller';
   const CONFIG_DIR = 'config';
 
+  private $instanceConfig = array();
+
   public  $webroot;
 
   private $routerDir = self::ROUTER_DIR;
@@ -29,6 +31,8 @@ class Application {
   public static function getInstance () {
     if (empty(self::$ins)) {
       self::$ins = new Application();
+      global $_QK_APPLICATION_INS;
+      $_QK_APPLICATION_INS = self::$ins;
     }
     return self::$ins;
   }
@@ -38,7 +42,8 @@ class Application {
     if (!empty($options)) {
       isset($options['router']) ? $this->routerDir = $options['router'] : null;
       isset($options['controller']) ? $this->controllerDir = $options['controller'] : null;
-      isset($options['config']) ? $this->configDir = $options['config'] : null;
+      isset($options['configDir']) ? $this->configDir = $options['configDir'] : null;
+      isset($options['configs']) && is_array($options['configs']) ? $this->instanceConfig = $options['configs'] : null;
       if ($options['cors']) {
         $this->supportCORS(isset($options['hosts']) ? $options['hosts'] : null);
       }
@@ -97,6 +102,30 @@ class Application {
 
   public function getConfigPath () {
     return $this->webroot . DIRECTORY_SEPARATOR . $this->configDir;
+  }
+
+  public function getAppConfig ($name, $key=null) {
+    return Config::getAppConf($name, $key);
+  }
+
+  public function getDBConfig ($name, $key=null) {
+    return Config::getDBConf($name, $key);
+  }
+
+  public function getServiceConfig ($name, $key=null) {
+    return Config::getServiceConf($name, $key);
+  }
+
+  public function getConfig ($name, $key=null, $type=null) {
+    return Config::getConf($name, $key, $type);
+  }
+
+  public function getInstanceConfig ($key) {
+    if (isset($this->instanceConfig[$key])) {
+      return $this->instanceConfig[$key];
+    } else {
+      return null;
+    }
   }
 
   private function supportCORS ($hosts=null) {
