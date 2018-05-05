@@ -19,7 +19,7 @@ abstract class Controller extends QKObject {
 
   //Section lifecycle
   public function beforeCall() {
-    return true;
+    //return true;
   }
 
   public function afterCall($response) {

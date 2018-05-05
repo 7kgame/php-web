@@ -171,7 +171,7 @@ class Mysql implements iPluginDao {
       if($vcount == 1) {
         $conditionSql[] = $dbAlias.trim($v[0]);
       } else if($vcount == 2){
-        $conditionSql[] = $dbalias.trim($v[0]);
+        $conditionSql[] = $dbAlias.trim($v[0]);
         $data[] = $v[1];
       } else {
         return array('', array());

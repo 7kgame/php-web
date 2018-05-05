@@ -101,6 +101,14 @@ abstract class Service extends QKObject {
     return $this->_getDao($fieldName)->getEntities($condition, $fields, $limit, $withLock);
   }
 
+  public function pagination (array $condition, array $fields=null, $page=1, $limit=20, $withLock=false, array $order=array(), $fieldName=null) {
+    return $this->_getDao($fieldName)->pagination($condition, $fields, $page, $limit, $withLock, $order);
+  }
+  
+  public function getList (array $condition, array $fields=null, $limit=20, $offset=0, $withLock=false, array $order=array(), $fieldName=null) {
+    return $this->_getDao($fieldName)->getList($condition, $fields, $limit, $offset, $withLock, $order);
+  }
+
   public function updateEntity (array $fields, array $params, array $condition, $fieldName=null) {
     return $this->_getDao($fieldName, true)->updateEntity($fields, $params, $condition);
   }
