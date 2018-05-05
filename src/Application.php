@@ -44,8 +44,8 @@ class Application {
       isset($options['controller']) ? $this->controllerDir = $options['controller'] : null;
       isset($options['configDir']) ? $this->configDir = $options['configDir'] : null;
       isset($options['configs']) && is_array($options['configs']) ? $this->instanceConfig = $options['configs'] : null;
-      if ($options['cors']) {
-        $this->supportCORS(isset($options['hosts']) ? $options['hosts'] : null);
+      if (isset($options['cors']) && is_array($options['cors'])) {
+        $this->supportCORS(isset($options['cors']['hosts']) ? $options['cors']['hosts'] : null);
       }
     }
     Config::setConfigDir($this->getConfigPath());
