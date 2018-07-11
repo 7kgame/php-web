@@ -15,6 +15,10 @@ abstract class Controller extends QKObject {
     $this->application = $application;
     $this->request = $request;
     $this->router = $router;
+    $this->postInit();
+  }
+
+  protected function postInit() {
   }
 
   //Section lifecycle
