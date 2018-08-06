@@ -90,11 +90,11 @@ abstract class Service extends QKObject {
     if (!empty($fields) && !is_array($fields)) {
       $fields = array($fields);
     }
-    return $this->_getDao($fieldName)->get($id, $fields, $withLock);
+    return $this->_getDao($fieldName, $withLock)->get($id, $fields, $withLock);
   }
 
   public function getEntity (array $condition, array $fields=null, $withLock=false, $fieldName=null) {
-    return $this->_getDao($fieldName)->getEntity($condition, $fields, $withLock);
+    return $this->_getDao($fieldName, $withLock)->getEntity($condition, $fields, $withLock);
   }
 
   public function getEntities (array $condition, array $fields=null, $limit=-1, $withLock=false, $fieldName=null) {
@@ -115,6 +115,18 @@ abstract class Service extends QKObject {
 
   public function deleteEntity (array $condition, $fieldName=null) {
     return $this->_getDao($fieldName, true)->deleteEntity($condition);
+  }
+
+  public function begin ($fieldName=null) {
+    return $this->_getDao($fieldName, true)->begin();
+  }
+
+  public function commit ($fieldName=null) {
+    return $this->_getDao($fieldName, true)->commit();
+  }
+
+  public function rollBack ($fieldName=null) {
+    return $this->_getDao($fieldName, true)->rollBack();
   }
 
 }
