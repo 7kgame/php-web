@@ -43,14 +43,29 @@ abstract class Service extends QKObject {
 
   private $otherDaoMasterUsed = array();
 
-  public function registerOtherDao ($fieldName, $daoPackage) {
+  public function registerOtherDao () {
+    $args = func_get_args();
+    $argc = count($args);
+    if ($argc < 2) {
+      return;
+    }
+    $fieldName = $args[0];
+    $daoPackage = $args[1];
     if (empty($fieldName) || empty($daoPackage)) {
       return;
     }
+    $mysqlConf = null;
+    $redisConf = null;
+    if ($argc > 2) {
+      $mysqlConf = $args[2];
+    }
+    if ($argc > 3) {
+      $redisConf = $args[3];
+    }
     if (!isset($this->otherDaoMasterUsed[$fieldName])) {
       $this->otherDaoMasterUsed[$fieldName] = false;
-      $this->registerObject("other.mdao.$fieldName", $daoPackage, true);
-      $this->registerObject("other.sdao.$fieldName", $daoPackage, true);
+      $this->registerObject("other.mdao.$fieldName", $daoPackage, true, $mysqlConf, $redisConf);
+      $this->registerObject("other.sdao.$fieldName", $daoPackage, false, $mysqlConf, $redisConf);
     }
   }
 
