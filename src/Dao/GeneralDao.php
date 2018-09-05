@@ -58,6 +58,9 @@ abstract class GeneralDao extends QKObject {
       throw new \Exception($type.' conf for '.($this->isMaster ? 'master' : 'slaver').' is not exist.');
     }
     $fieldName = $type.':'.$conf['host'].','.$conf['port'];
+    if($type == self::DB_MYSQL) {
+      $fieldName = 'mysql:'.$conf['host'].','.$conf['port'].','.$conf['user'];
+    }
     $this->registerGlobalObject($fieldName, $classPath, $conf);
     return $fieldName;
   }

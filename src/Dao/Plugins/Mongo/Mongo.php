@@ -24,8 +24,8 @@ class Mongo implements iPluginDao {
     }
     $this->host = $conf['host'];
     $this->port = $conf['port'];
-    $this->user = $conf['user'];
-    $this->passwd = $conf['passwd'];
+    $this->user = isset($conf['user']) ? $conf['user'] : '';
+    $this->passwd = isset($conf['passwd']) ? $conf['passwd'] : '';
   }
 
   public function connect () {
