@@ -16,6 +16,11 @@ abstract class Service extends QKObject {
     $this->setDaoPackage($daoPackage);
   }
 
+  public function getApplication () {
+    global $_QK_APPLICATION_INS;
+    return $_QK_APPLICATION_INS;
+  }
+
   public function setDaoPackage ($daoPackage) {
     $this->daoPackage = $daoPackage;
     if (!empty($daoPackage)) {
@@ -38,14 +43,29 @@ abstract class Service extends QKObject {
 
   private $otherDaoMasterUsed = array();
 
-  public function registerOtherDao ($fieldName, $daoPackage) {
+  public function registerOtherDao () {
+    $args = func_get_args();
+    $argc = count($args);
+    if ($argc < 2) {
+      return;
+    }
+    $fieldName = $args[0];
+    $daoPackage = $args[1];
     if (empty($fieldName) || empty($daoPackage)) {
       return;
     }
+    $mysqlConf = null;
+    $redisConf = null;
+    if ($argc > 2) {
+      $mysqlConf = $args[2];
+    }
+    if ($argc > 3) {
+      $redisConf = $args[3];
+    }
     if (!isset($this->otherDaoMasterUsed[$fieldName])) {
       $this->otherDaoMasterUsed[$fieldName] = false;
-      $this->registerObject("other.mdao.$fieldName", $daoPackage, true);
-      $this->registerObject("other.sdao.$fieldName", $daoPackage, true);
+      $this->registerObject("other.mdao.$fieldName", $daoPackage, true, $mysqlConf, $redisConf);
+      $this->registerObject("other.sdao.$fieldName", $daoPackage, false, $mysqlConf, $redisConf);
     }
   }
 
@@ -85,11 +105,11 @@ abstract class Service extends QKObject {
     if (!empty($fields) && !is_array($fields)) {
       $fields = array($fields);
     }
-    return $this->_getDao($fieldName)->get($id, $fields, $withLock);
+    return $this->_getDao($fieldName, $withLock)->get($id, $fields, $withLock);
   }
 
   public function getEntity (array $condition, array $fields=null, $withLock=false, $fieldName=null) {
-    return $this->_getDao($fieldName)->getEntity($condition, $fields, $withLock);
+    return $this->_getDao($fieldName, $withLock)->getEntity($condition, $fields, $withLock);
   }
 
   public function getEntities (array $condition, array $fields=null, $limit=-1, $withLock=false, $fieldName=null) {
@@ -110,6 +130,18 @@ abstract class Service extends QKObject {
 
   public function deleteEntity (array $condition, $fieldName=null) {
     return $this->_getDao($fieldName, true)->deleteEntity($condition);
+  }
+
+  public function begin ($fieldName=null) {
+    return $this->_getDao($fieldName, true)->begin();
+  }
+
+  public function commit ($fieldName=null) {
+    return $this->_getDao($fieldName, true)->commit();
+  }
+
+  public function rollBack ($fieldName=null) {
+    return $this->_getDao($fieldName, true)->rollBack();
   }
 
 }
