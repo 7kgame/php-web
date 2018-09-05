@@ -12,11 +12,19 @@ abstract class GeneralDao extends QKObject {
   private $slaverMysqlConf;
   private $masterRedisConf;
   private $slaverRedisConf;
+  private $masterMongoConf;
+  private $slaverMongoConf;
 
-  public function __construct ($isMaster=false, array $mysqlConf=null, array $redisConf=null) {
+  public function __construct ($isMaster=false, array $mysqlConf=null, array $redisConf=null, $mongoConf=null) {
     $this->isMaster  = $isMaster;
     $this->setMysqlConf($mysqlConf);
     $this->setRedisConf($redisConf);
+    $this->setMongoConf($mongoConf);
+  }
+
+  public function getApplication () {
+    global $_QK_APPLICATION_INS;
+    return $_QK_APPLICATION_INS;
   }
 
   public function setMysqlConf (array $mysqlConf=null) {
@@ -59,6 +67,26 @@ abstract class GeneralDao extends QKObject {
     }
   }
 
+  public function setMongoConf (array $mongoConf=null) {
+    if (empty($mongoConf)) {
+      return;
+    }
+    if (isset($mongoConf['host'])) {
+      if ($this->isMaster) {
+        $this->masterMongoConf = $mongoConf;
+      } else {
+        $this->slaverMongoConf = $mongoConf;
+      }
+    } else {
+      if ($this->isMaster && isset($mongoConf['master'])) {
+        $this->masterMongoConf = $mongoConf['master'];
+      }
+      if (!$this->isMaster && isset($mongoConf['slaver'])) {
+        $this->slaverMongoConf = $mongoConf['slaver'];
+      }
+    }
+  }
+
   private function registerMysql () {
     $conf = null;
     if ($this->isMaster) {
@@ -89,6 +117,21 @@ abstract class GeneralDao extends QKObject {
     return $fieldName;
   }
 
+  private function registerMongo () {
+    $conf = null;
+    if ($this->isMaster) {
+      $conf = $this->masterMongoConf;
+    } else {
+      $conf = empty($this->slaverMongoConf) ? $this->masterMongoConf: $this->slaverMongoConf;
+    }
+    if (empty($conf)) {
+      throw new \Exception('mongo conf for '.($this->isMaster ? 'master' : 'slaver').' is not exist.');
+    }
+    $fieldName = 'mongo:'.$conf['host'].','.$conf['port'];
+    $this->registerGlobalObject($fieldName, '\QKPHP\Web\Dao\Plugins\Mongo\Mongo', $conf);
+    return $fieldName;
+  }
+
   public function getMysql () {
     $fieldName = $this->registerMysql();
     return $this->$fieldName;
@@ -96,6 +139,11 @@ abstract class GeneralDao extends QKObject {
 
   public function getRedis () {
     $fieldName = $this->registerRedis();
+    return $this->$fieldName;
+  }
+
+  public function getMongo () {
+    $fieldName = $this->registerMongo();
     return $this->$fieldName;
   }
 
