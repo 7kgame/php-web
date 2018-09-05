@@ -8,18 +8,18 @@ abstract class GeneralDao extends QKObject {
 
   private $isMaster = false;
 
-  private $masterMysqlConf;
-  private $slaverMysqlConf;
-  private $masterRedisConf;
-  private $slaverRedisConf;
-  private $masterMongoConf;
-  private $slaverMongoConf;
+  private $masterConf = array();
+  private $slaverConf = array();
+
+  const DB_MYSQL = 'mysql';
+  const DB_REDIS = 'redis';
+  const DB_MONGO = 'mongo';
 
   public function __construct ($isMaster=false, array $mysqlConf=null, array $redisConf=null, $mongoConf=null) {
     $this->isMaster  = $isMaster;
-    $this->setMysqlConf($mysqlConf);
-    $this->setRedisConf($redisConf);
-    $this->setMongoConf($mongoConf);
+    $this->setDBConf($mysqlConf, self::DB_MYSQL);
+    $this->setDBConf($redisConf, self::DB_REDIS);
+    $this->setDBConf($mongoConf, self::DB_MONGO);
   }
 
   public function getApplication () {
@@ -27,123 +27,56 @@ abstract class GeneralDao extends QKObject {
     return $_QK_APPLICATION_INS;
   }
 
-  public function setMysqlConf (array $mysqlConf=null) {
-    if (empty($mysqlConf)) {
+  public function setDBConf ($conf, $type = self::DB_MYSQL) {
+    if (empty($conf)) {
       return;
     }
-    if (isset($mysqlConf['host'])) {
+    if (isset($conf['host'])) {
       if ($this->isMaster) {
-        $this->masterMysqlConf = $mysqlConf;
+        $this->masterConf[$type] = $conf;
       } else {
-        $this->slaverMysqlConf = $mysqlConf;
+        $this->slaverConf[$type] = $conf;
       }
     } else {
-      if ($this->isMaster && isset($mysqlConf['master'])) {
-        $this->masterMysqlConf = $mysqlConf['master'];
+      if ($this->isMaster && isset($conf['master'])) {
+        $this->masterConf[$type] = $conf['master'];
       }
-      if (!$this->isMaster && isset($mysqlConf['slaver'])) {
-        $this->slaverMysqlConf = $mysqlConf['slaver'];
+      if (!$this->isMaster && isset($conf['slaver'])) {
+        $this->slaverConf[$type] = $conf['slaver'];
       }
     }
   }
 
-  public function setRedisConf (array $redisConf=null) {
-    if (empty($redisConf)) {
-      return;
-    }
-    if (isset($redisConf['host'])) {
-      if ($this->isMaster) {
-        $this->masterRedisConf = $redisConf;
-      } else {
-        $this->slaverRedisConf = $redisConf;
-      }
-    } else {
-      if ($this->isMaster && isset($redisConf['master'])) {
-        $this->masterRedisConf = $redisConf['master'];
-      }
-      if (!$this->isMaster && isset($redisConf['slaver'])) {
-        $this->slaverRedisConf = $redisConf['slaver'];
-      }
-    }
-  }
-
-  public function setMongoConf (array $mongoConf=null) {
-    if (empty($mongoConf)) {
-      return;
-    }
-    if (isset($mongoConf['host'])) {
-      if ($this->isMaster) {
-        $this->masterMongoConf = $mongoConf;
-      } else {
-        $this->slaverMongoConf = $mongoConf;
-      }
-    } else {
-      if ($this->isMaster && isset($mongoConf['master'])) {
-        $this->masterMongoConf = $mongoConf['master'];
-      }
-      if (!$this->isMaster && isset($mongoConf['slaver'])) {
-        $this->slaverMongoConf = $mongoConf['slaver'];
-      }
-    }
-  }
-
-  private function registerMysql () {
+  private function registerDb ($type, $classPath) {
     $conf = null;
     if ($this->isMaster) {
-      $conf = $this->masterMysqlConf;
+      $conf = $this->masterConf[$type];
     } else {
-      $conf = empty($this->slaverMysqlConf) ? $this->masterMysqlConf : $this->slaverMysqlConf;
+      $conf = empty($this->slaverConf[$type]) ? $this->masterConf[$type]: $this->slaverConf[$type];
     }
     if (empty($conf)) {
-      throw new \Exception('mysql conf for '.($this->isMaster ? 'master' : 'slaver').' is not exist.');
+      throw new \Exception($type.' conf for '.($this->isMaster ? 'master' : 'slaver').' is not exist.');
     }
-    $fieldName = 'mysql:'.$conf['host'].','.$conf['port'].','.$conf['user'];
-    $this->registerGlobalObject($fieldName, '\QKPHP\Web\Dao\Plugins\Mysql\Mysql', $conf);
-    return $fieldName;
-  }
-
-  private function registerRedis () {
-    $conf = null;
-    if ($this->isMaster) {
-      $conf = $this->masterRedisConf;
-    } else {
-      $conf = empty($this->slaverRedisConf) ? $this->masterRedisConf: $this->slaverRedisConf;
-    }
-    if (empty($conf)) {
-      throw new \Exception('redis conf for '.($this->isMaster ? 'master' : 'slaver').' is not exist.');
-    }
-    $fieldName = 'redis:'.$conf['host'].','.$conf['port'];
-    $this->registerGlobalObject($fieldName, '\QKPHP\Web\Dao\Plugins\Redis\Redis', $conf);
-    return $fieldName;
-  }
-
-  private function registerMongo () {
-    $conf = null;
-    if ($this->isMaster) {
-      $conf = $this->masterMongoConf;
-    } else {
-      $conf = empty($this->slaverMongoConf) ? $this->masterMongoConf: $this->slaverMongoConf;
-    }
-    if (empty($conf)) {
-      throw new \Exception('mongo conf for '.($this->isMaster ? 'master' : 'slaver').' is not exist.');
-    }
-    $fieldName = 'mongo:'.$conf['host'].','.$conf['port'];
-    $this->registerGlobalObject($fieldName, '\QKPHP\Web\Dao\Plugins\Mongo\Mongo', $conf);
+    $fieldName = $type.':'.$conf['host'].','.$conf['port'];
+    $this->registerGlobalObject($fieldName, $classPath, $conf);
     return $fieldName;
   }
 
   public function getMysql () {
-    $fieldName = $this->registerMysql();
+    $classPath = '\QKPHP\Web\Dao\Plugins\Mysql\Mysql';
+    $fieldName = $this->registerDb(self::DB_MYSQL, $classPath);
     return $this->$fieldName;
   }
 
   public function getRedis () {
-    $fieldName = $this->registerRedis();
+    $classPath = '\QKPHP\Web\Dao\Plugins\Redis\Redis';
+    $fieldName = $this->registerDb(self::DB_REDIS, $classPath);
     return $this->$fieldName;
   }
 
   public function getMongo () {
-    $fieldName = $this->registerMongo();
+    $classPath = '\QKPHP\Web\Dao\Plugins\Mongo\Mongo';
+    $fieldName = $this->registerDb(self::DB_MONGO, $classPath);
     return $this->$fieldName;
   }
 

@@ -10,7 +10,6 @@ class Mongo implements iPluginDao {
   private $port;
   private $user;
   private $passwd;
-  private $isSSL = false;
 
   private $mongo;
 
@@ -27,15 +26,13 @@ class Mongo implements iPluginDao {
     $this->port = $conf['port'];
     $this->user = $conf['user'];
     $this->passwd = $conf['passwd'];
-    $this->SSL = isset($conf['ssl']) ? $conf['ssl'] : false;
   }
 
   public function connect () {
     $uri = 'mongodb://'. $this->host .':' .$this->port;
     $uriOptions = array(
-      //'username' => $this->user,
-      //'password' => $this->passwd,
-      //'ssl' => $this->isSSL
+      'username' => $this->user,
+      'password' => $this->passwd
     );
     $driverOptions = array();
     $this->mongo = new \MongoDB\Client($uri, $uriOptions, $driverOptions);
