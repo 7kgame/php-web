@@ -53,23 +53,24 @@ class Router {
       if (substr($file, -4) != '.php') {
         continue;
       }
-      $pid = pcntl_fork();
-      if ($pid == -1) {
-        die("fork child failed\n");
-      } else if ($pid) {
-        pcntl_wait($status);
-      } else {
-        include($file);
+      //$pid = pcntl_fork();
+      //if ($pid == -1) {
+      //  die("fork child failed\n");
+      //} else if ($pid) {
+      //  pcntl_wait($status);
+      //} else {
+        include_once($file);
         $fileParts = explode(DIRECTORY_SEPARATOR, $file);
         $className = rtrim(array_pop($fileParts), '.php');
         $annotations = Annotation::parse($className, $file); 
         $parseResult = self::parseOne($annotations);
         if (empty($parseResult)) {
-          exit(0);
+          continue;
+          //exit(0);
         }
         self::genRouterFile($parseResult[0], $parseResult[1], $className, $file, $controllerDir, $routerDir);
-        exit(0);
-      }
+        //exit(0);
+      //}
     }
   }
 
@@ -180,29 +181,31 @@ class Router {
       'class' => $className,
       'annos' => $classAnnos
     );
-    foreach ($annos['method'] as $methodInfo) {
-      $methodAnnos = null;
-      if (!empty($methodInfo['annos'])) {
-        $methodAnnos = array();
-        foreach ($methodInfo['annos'] as $anno) {
-          $methodAnnos[$anno[0]] = $anno[1];
+    if (!empty($annos['method'])) {
+      foreach ($annos['method'] as $methodInfo) {
+        $methodAnnos = null;
+        if (!empty($methodInfo['annos'])) {
+          $methodAnnos = array();
+          foreach ($methodInfo['annos'] as $anno) {
+            $methodAnnos[$anno[0]] = $anno[1];
+          }
         }
-      }
-      $methodItem = array(
-        'class' => $classRelativePath,
-        'method' => $methodInfo['method'],
-        'paramsSize' => $methodInfo['paramsSize'],
-        'annos' => $methodAnnos
-      );
-      foreach(explode('|', $methodInfo['requestMethod']) as $rm) {
-        $rm = trim($rm);
-        if (empty($rm)) {
-          continue;
+        $methodItem = array(
+          'class' => $classRelativePath,
+          'method' => $methodInfo['method'],
+          'paramsSize' => $methodInfo['paramsSize'],
+          'annos' => $methodAnnos
+        );
+        foreach(explode('|', $methodInfo['requestMethod']) as $rm) {
+          $rm = trim($rm);
+          if (empty($rm)) {
+            continue;
+          }
+          if (!isset($routerInfo[$rm])) {
+            $routerInfo[$rm] = array();
+          }
+          $routerInfo[$rm][$methodInfo['path']] = $methodItem;
         }
-        if (!isset($routerInfo[$rm])) {
-          $routerInfo[$rm] = array();
-        }
-        $routerInfo[$rm][$methodInfo['path']] = $methodItem;
       }
     }
     $out = "<?php\nreturn " . var_export($routerInfo, true) . ";\n";
