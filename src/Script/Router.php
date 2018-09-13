@@ -53,24 +53,24 @@ class Router {
       if (substr($file, -4) != '.php') {
         continue;
       }
-      //$pid = pcntl_fork();
-      //if ($pid == -1) {
-      //  die("fork child failed\n");
-      //} else if ($pid) {
-      //  pcntl_wait($status);
-      //} else {
+      $pid = pcntl_fork();
+      if ($pid == -1) {
+        die("fork child failed\n");
+      } else if ($pid) {
+        pcntl_wait($status);
+      } else {
         include_once($file);
         $fileParts = explode(DIRECTORY_SEPARATOR, $file);
         $className = rtrim(array_pop($fileParts), '.php');
         $annotations = Annotation::parse($className, $file); 
         $parseResult = self::parseOne($annotations);
         if (empty($parseResult)) {
-          continue;
-          //exit(0);
+          //continue;
+          exit(0);
         }
         self::genRouterFile($parseResult[0], $parseResult[1], $className, $file, $controllerDir, $routerDir);
-        //exit(0);
-      //}
+        exit(0);
+      }
     }
   }
 
