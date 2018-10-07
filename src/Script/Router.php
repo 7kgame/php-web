@@ -61,7 +61,11 @@ class Router {
       } else {
         include_once($file);
         $fileParts = explode(DIRECTORY_SEPARATOR, $file);
-        $className = rtrim(array_pop($fileParts), '.php');
+        $className = array_pop($fileParts);
+        if (substr($className, -4) == '.php') {
+          $className = substr($className, 0, -4);
+        }
+        //$className = rtrim(array_pop($fileParts), '.php');
         $annotations = Annotation::parse($className, $file); 
         $parseResult = self::parseOne($annotations);
         if (empty($parseResult)) {
@@ -163,7 +167,11 @@ class Router {
     if ($fileName == '/') {
       $fileName = '_';
     }
-    $classRelativePath = rtrim(trim(str_replace($controllerDir, '', $classFile), '/'), '.php');
+    //$classRelativePath = rtrim(trim(str_replace($controllerDir, '', $classFile), '/'), '.php');
+    $classRelativePath = trim(str_replace($controllerDir, '', $classFile), '/');;
+    if (substr($classRelativePath, -4) == '.php') {
+      $classRelativePath = substr($classRelativePath, 0, -4);
+    }
     $routerFile = $routerDir . DIRECTORY_SEPARATOR . $fileName . '.php';
     $routerInfo = array();
     if (file_exists($routerFile)) {
