@@ -33,7 +33,7 @@ class Request {
       if (empty($_POST)) {
         $input = file_get_contents("php://input");
         if (!empty($input)) {
-          if (strpos(strtolower($_SERVER['CONTENT_TYPE']), 'application/xml') !== false) {
+          if (strpos(strtolower($_SERVER['CONTENT_TYPE']), 'xml') !== false) {
             $params3 = Url::processRequestValue(Utils::xmlToArr($input));
           } else {
             $params3 = Url::processRequestValue(json_decode($input, true));
