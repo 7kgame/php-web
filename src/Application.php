@@ -22,6 +22,8 @@ class Application {
   private $controllerDir = self::CONTROLLER_DIR;
   private $configDir = self::CONFIG_DIR;
 
+  private $_supportCORS = false;
+
   private function __construct() {}
 
   private function __clone() {}
@@ -45,6 +47,7 @@ class Application {
       isset($options['configDir']) ? $this->configDir = $options['configDir'] : null;
       isset($options['configs']) && is_array($options['configs']) ? $this->instanceConfig = $options['configs'] : null;
       if (isset($options['cors']) && is_array($options['cors'])) {
+        $this->_supportCORS = true;
         $this->supportCORS(isset($options['cors']['hosts']) ? $options['cors']['hosts'] : null);
       }
     }
@@ -55,6 +58,10 @@ class Application {
   public function start () {
     if (empty($this->webroot)) {
       $this->showHttpError('502');
+    }
+
+    if ($this->_supportCORS && strtoupper($_SERVER['REQUEST_METHOD']) === 'OPTIONS') {
+      die('');
     }
 
     $paths = explode('/', trim(Url::getRequestPath(), '/'));
@@ -80,9 +87,6 @@ class Application {
       }
     }
     $controller->init($this, $request, $router);
-    if ($request->method === 'OPTIONS') {
-      die('');
-    }
     if ($result = $controller->beforeCall()) {
       header('Content-Type: application/json');
       $result = json_encode($result);
