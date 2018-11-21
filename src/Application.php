@@ -80,11 +80,13 @@ class Application {
       }
     }
     $controller->init($this, $request, $router);
+    if ($request->method === 'OPTIONS') {
+      die('');
+    }
     if ($result = $controller->beforeCall()) {
       header('Content-Type: application/json');
       $result = json_encode($result);
-      echo $result;
-      die();
+      die($result);
     }
 
     $response = call_user_func_array(array($controller, $router->method), $params);

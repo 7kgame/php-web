@@ -6,7 +6,8 @@ use \QKPHP\Common\Utils\Utils;
 
 class Request {
 
-  private $ip;
+  public $ip;
+  public $method;
   private $params;
   private $files;
 
@@ -28,8 +29,8 @@ class Request {
       $params2 = Url::processRequestValue($_POST);
     }
     $params3 = array();
-    $method = strtoupper($_SERVER['REQUEST_METHOD']);
-    if ($method == 'POST' || $method == 'PUT' || $method == 'PATCH') {
+    $this->method = strtoupper($_SERVER['REQUEST_METHOD']);
+    if ($this->method == 'POST' || $this->method == 'PUT' || $this->method == 'PATCH') {
       if (empty($_POST)) {
         $input = file_get_contents("php://input");
         if (!empty($input)) {
