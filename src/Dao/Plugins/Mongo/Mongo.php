@@ -32,13 +32,18 @@ class Mongo implements iPluginDao {
 
   public function connect () {
     $uri = 'mongodb://'. $this->host .':' .$this->port;
-    $uriOptions = array(
-      'username' => $this->user,
-      'password' => $this->passwd,
-      'authSource' => $this->dbName
-    );
+    $uriOptions = array();
+    if (!empty($this->user)) {
+      $uriOptions['username'] = $this->user;
+      $uriOptions['password'] = $this->passwd;
+      $uriOptions['authSource'] = $this->dbName;
+    }
     $driverOptions = array();
     $this->mongo = new \MongoDB\Client($uri, $uriOptions, $driverOptions);
+  }
+
+  public function getIns () {
+    return $this->mongo;
   }
 
   public function __call($method, $args) {

@@ -144,4 +144,13 @@ abstract class Service extends QKObject {
     return $this->_getDao($fieldName, true)->rollBack();
   }
 
+  public function beginGlobal () {
+  }
+
+  public function commitGlobal () {
+  }
+
+  public function rollBackGlobal () {
+  }
+
 }

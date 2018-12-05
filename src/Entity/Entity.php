@@ -4,8 +4,22 @@ namespace QKPHP\Web\Entity;
 
 abstract class Entity {
 
+  /**
+   *  eg: 
+   *    $fields = array(
+   *      'name',          // define fieldName
+   *      'id' => array(   // define fieldName and field type
+   *        'type' => 'int'
+   *      ),
+   *      'money => array( // define fieldName, field type and the default value
+   *        'val' => 0.0,
+   *        'type' => 'float'
+   *      )
+   *    )
+   */
   protected $fields = array();
   private $kvmap = array();
+  private $filedTypes = array();
 
   private static $defaultActionName = "default";
   private $rules = array();
@@ -14,10 +28,15 @@ abstract class Entity {
 
   public function __construct() {
     foreach($this->fields as $k=>$v) {
-      if(is_numeric($k)) {
-        $this->kvmap[$v] = 0;
+      if (is_array($v)) {
+        $this->kvmap[$k] = isset($v['val']) ? $v['val'] : 0;
+        $this->filedTypes[$k] = isset($v['type']) ? $v['type'] : 'string';
       } else {
-        $this->kvmap[$k] = $v;
+        if (is_numeric($k)) {
+          $this->kvmap[$v] = 0;
+        } else {
+          $this->kvmap[$k] = $v;
+        }
       }
     }
   }
@@ -33,6 +52,20 @@ abstract class Entity {
     if(isset($this->kvmap[$field])) {
       $this->filledFields[$field] = true;
       if(!$ignoreNull || $value !== null) {
+        if (isset($this->filedTypes[$field])) {
+          $type = $this->filedTypes[$field];
+          switch ($type) {
+            case 'int':
+              $value = (int) $value;
+              break;
+            case 'bool':
+              $value = (bool) $value;
+              break;
+            case 'float':
+              $value = (float) $value;
+              break;
+          }
+        }
         $this->kvmap[$field] = $value;
       }
     }
