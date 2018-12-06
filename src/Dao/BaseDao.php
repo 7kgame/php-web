@@ -74,7 +74,7 @@ abstract class BaseDao extends QKObject {
     if (isset($conf['user'])) {
       $fieldName .= ',' . $conf['user'];
     }
-    $this->registerGlobalObject($fieldName, $classPath, $conf, $this->options);
+    $this->registerObject($fieldName, $classPath, $conf, $this->options);
     return $fieldName;
   }
 

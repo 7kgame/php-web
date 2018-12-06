@@ -5,6 +5,8 @@ use QKPHP\Web\Dao\Storages\Storage;
 
 class Mongo extends Storage {
 
+  private static $conn;
+
   public function __construct (array $conf, array $options=null) {
     parent::__construct($conf, $options);
     if (!empty($options)) {
@@ -15,15 +17,18 @@ class Mongo extends Storage {
   }
 
   public function connect () {
-    $uri = 'mongodb://'. $this->host .':' .$this->port;
-    $uriOptions = array();
-    if (!empty($this->user)) {
-      $uriOptions['username'] = $this->user;
-      $uriOptions['password'] = $this->passwd;
-      $uriOptions['authSource'] = $this->dbName;
+    if (!self::$conn) {
+      $uri = 'mongodb://'. $this->host .':' .$this->port;
+      $uriOptions = array();
+      if (!empty($this->user)) {
+        $uriOptions['username'] = $this->user;
+        $uriOptions['password'] = $this->passwd;
+        $uriOptions['authSource'] = $this->dbName;
+      }
+      $driverOptions = array();
+      self::$conn = new \MongoDB\Client($uri, $uriOptions, $driverOptions);
     }
-    $driverOptions = array();
-    $this->ins = new \MongoDB\Client($uri, $uriOptions, $driverOptions);
+    $this->ins = self::$conn;
   }
 
   public function getCollection() {
