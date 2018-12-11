@@ -120,15 +120,15 @@ abstract class BaseDao extends QKObject {
     return $this->getMongo()->getIns();
   }
 
-  public function begin ($storageType=Type::MYSQL) {
+  public function begin ($storageType=Types::MYSQL) {
     return $this->getStorage($storageType)->begin();
   }
 
-  public function commit ($storageType=Type::MYSQL) {
+  public function commit ($storageType=Types::MYSQL) {
     return $this->getStorage($storageType)->commit();
   }
 
-  public function rollBack ($storageType=Type::MYSQL) {
+  public function rollBack ($storageType=Types::MYSQL) {
     return $this->getStorage($storageType)->rollBack();
   }
 
