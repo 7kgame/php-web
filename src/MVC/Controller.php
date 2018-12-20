@@ -152,12 +152,17 @@ abstract class Controller extends QKObject {
     if (empty($fields)) {
       return array(false, null, null, null);
     }
+    $emptySet = true;
     foreach ($fields as $field) {
       $value = $this->request->getStr($field, null);
       if ($value === null && $fieldFilter == 2) {
         continue;
       }
+      $emptySet = false;
       $entity->set($field, $value);
+    }
+    if ($emptySet) {
+      return array(false, array(-1), array('参数为空'), $entity);
     }
     list($status, $errorCodes, $errorMsgs) = $entity->validate($action);
     return array($status, $errorCodes, $errorMsgs, $entity);
