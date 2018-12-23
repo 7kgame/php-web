@@ -24,8 +24,8 @@ abstract class Storage implements IStorage {
       if (isset($options['db']) && isset($options['tbl'])) {
         $this->setDBAndTbl($options['db'], $options['tbl']);
       }
-      if (isset($options['primaryKey'])) {
-        $this->setPrimaryKey($options['primaryKey']);
+      if (isset($options['pk'])) {
+        $this->setPrimaryKey($options['pk']);
       }
     }
   }
