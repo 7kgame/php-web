@@ -6,6 +6,15 @@ use \QKPHP\Web\QKObject;
 
 abstract class Controller extends QKObject {
 
+  /**
+   * $fieldFilter: 0 返回action定义的fields
+   *               1 返回entity定义的fields
+   *               2 返回action定义的fields与post fields的交集
+   */
+  const VALIDATOR_ACTION_FIELDS = 0;
+  const VALIDATOR_ENTITY_FIELDS = 1;
+  const VALIDATOR_ACTION_ENTITY_FIELDS = 2;
+
   //Section init
   protected $application;
   protected $request;
@@ -138,12 +147,12 @@ abstract class Controller extends QKObject {
    *               1 返回entity定义的fields
    *               2 返回action定义的fields与post fields的交集
    */
-  protected function validate($entity, $action = "default", $fieldFilter = 0, $options=null) {
+  protected function validate($entity, $action = "default", $fieldFilter = self::VALIDATOR_ACTION_ENTITY_FIELDS, $options=null) {
     if (is_string($entity)) {
       $entity = new $entity;
     }
     $entity->initValidator($options);
-    if ($fieldFilter == 1) {
+    if ($fieldFilter == self::VALIDATOR_ENTITY_FIELDS) {
       $v = $entity->toArray(false);
       $fields = array_keys($v);
     } else {
@@ -155,7 +164,7 @@ abstract class Controller extends QKObject {
     $emptySet = true;
     foreach ($fields as $field) {
       $value = $this->request->getStr($field, null);
-      if ($value === null && $fieldFilter == 2) {
+      if ($value === null && $fieldFilter == self::VALIDATOR_ACTION_ENTITY_FIELDS) {
         continue;
       }
       $emptySet = false;
@@ -168,12 +177,12 @@ abstract class Controller extends QKObject {
     return array($status, $errorCodes, $errorMsgs, $entity);
   }
 
-  protected function multiValidate($entity, $action = "default", $fieldFilter = 0, $options=null) {
+  protected function multiValidate($entity, $action = "default", $fieldFilter = self::VALIDATOR_ACTION_ENTITY_FIELDS, $options=null) {
     if (is_string($entity)) {
       $entity = new $entity;
     }
     $entity->initValidator($options);
-    if ($fieldFilter == 1) {
+    if ($fieldFilter == self::VALIDATOR_ENTITY_FIELDS) {
       $v = $entity->toArray(false);
       $fields = array_keys($v);
     } else {
@@ -185,7 +194,7 @@ abstract class Controller extends QKObject {
     $entitys = array();
     foreach ($fields as $field) {
       $values = $this->request->get($field);
-      if ($values === null && $fieldFilter == 2) {
+      if ($values === null && $fieldFilter == self::VALIDATOR_ACTION_ENTITY_FIELDS) {
         continue;
       }
       for ($i = 0; $i < count($values); $i++) {
