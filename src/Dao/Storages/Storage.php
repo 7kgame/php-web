@@ -52,6 +52,9 @@ abstract class Storage implements IStorage {
   public function rollBack() {}
 
   public function setDBAndTbl($db, $tbl) {
+    if ($db && empty($this->dbName)) {
+      $this->dbName = $db;
+    }
     $this->_db = $db;
     $this->_tbl = $tbl;
   }
