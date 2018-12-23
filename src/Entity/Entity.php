@@ -105,12 +105,15 @@ abstract class Entity {
     return $this;
   }
 
-  abstract public function initValidator($options);
-  abstract public function getStaticMessageMap();
+  abstract protected function initValidator($options);
+
+  protected function getMessageMap() {
+    return null;
+  }
 
   public function getMessage($code) {
     $code = "$code";
-    $messageMap = $this->getStaticMessageMap();
+    $messageMap = $this->getMessageMap();
     if(!empty($messageMap) && isset($messageMap[$code])) {
       return $messageMap[$code];
     } else {
@@ -145,7 +148,7 @@ abstract class Entity {
       $action = self::$defaultActionName;
     }
     if($errorMsg === null) {
-      $error = $this->getStaticMessageMap();
+      $error = $this->getMessageMap();
       if(isset($error[$errorCode])) {
         $errorMsg = $error[$errorCode];
       }
