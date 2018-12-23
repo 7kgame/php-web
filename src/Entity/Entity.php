@@ -105,7 +105,7 @@ abstract class Entity {
     return $this;
   }
 
-  abstract protected function initValidator($options);
+  abstract public function initValidator($options);
 
   protected function getMessageMap() {
     return null;
