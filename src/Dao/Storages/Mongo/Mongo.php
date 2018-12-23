@@ -10,8 +10,8 @@ class Mongo extends Storage {
   public function __construct (array $conf, array $options=null) {
     parent::__construct($conf, $options);
     if (!empty($options)) {
-      if (isset($options['db']) && isset($options['tpl'])) {
-        $this->setDBAndTbl($options['db'], $options['tpl']);
+      if (isset($options['db']) && isset($options['tbl'])) {
+        $this->setDBAndTbl($options['db'], $options['tbl']);
       }
     }
   }
