@@ -18,12 +18,17 @@ class Router {
   public $params;
   public $method;
 
+  private $realRouterName;
+
+  private $wildcardPattern = '*';
+
   public function __construct($routerDir, $routerName) {
     $this->target = $routerName;
     $routerFile = $routerDir . DIRECTORY_SEPARATOR . $routerName . '.php';
     if (is_file($routerFile)) {
       $this->router = require($routerFile);
     } else {
+      $this->realRouterName = $routerName;
       $routerName = '_';
       $this->target = $routerName;
       $routerFile = $routerDir . DIRECTORY_SEPARATOR . $routerName . '.php';
@@ -32,6 +37,9 @@ class Router {
   }
 
   public function parse(array $paths, $method='get') {
+    if ($this->realRouterName) {
+      $paths = array_merge(array($this->realRouterName), $paths);
+    }
     if (empty($paths)) {
       $paths = array('/');
     }
@@ -48,18 +56,31 @@ class Router {
       $this->params = null;
     } else {
       $this->pattern = null;
-      foreach ($this->router[$method] as $path => $v) {
-        $params = $this->searchPattern($path, $v);
-        if (!empty($params)) {
-          $this->meta = $v;
-          $this->pattern = $path;
+      $patterns = array_keys($this->router[$method]);
+      $patternsLen = array();
+      foreach ($patterns as $pattern) {
+        $patternsLen[] = count(explode('/', $pattern));
+      }
+      arsort($patternsLen);
+      foreach ($patternsLen as $idx => $v) {
+        $pattern = $patterns[$idx];
+        $params = $this->searchPattern($pattern, $this->router[$method][$pattern]);
+        if ($params !== false) {
+          $this->meta = $this->router[$method][$pattern];
+          $this->pattern = $pattern;
           $this->params = $params;
           break;
         }
       }
     }
     if (empty($this->pattern)) {
-      return false;
+      if (isset($this->router[$method][$this->wildcardPattern])) {
+        $this->meta = $this->router[$method][$this->wildcardPattern];
+        $this->pattern = $this->wildcardPattern;
+        $this->params = array();
+      } else {
+        return false;
+      }
     }
 
     $this->method = $this->meta['method'];
@@ -76,28 +97,31 @@ class Router {
 
   private function searchPattern($pattern, $meta) {
     if (empty($meta) || !is_array($meta)) {
-      return;
+      return false;
     }
-    $paths = explode('/', $pattern);
-    $pathsLen = count($paths);
-    if ($pathsLen != count($this->paths)) {
-      return;
+    $patterns = explode('/', $pattern);
+    $patternsLen= count($patterns);
+    if (strpos($pattern, $this->wildcardPattern) === false && $patternsLen != count($this->paths)) {
+      return false;
     }
     $params = array();
-    for($i=0; $i<$pathsLen; $i++) {
-      if (strpos($paths[$i], '{') === 0) {
+    for($i=0; $i<$patternsLen; $i++) {
+      if (strpos($patterns[$i], '{') === 0) {
         if (is_numeric($this->paths[$i])) {
           $this->paths[$i] = $this->paths[$i] - 0;
         }
         $params[] = $this->paths[$i];
         continue;
       }
-      if ($paths[$i] != $this->paths[$i]) {
-        return;
+      if ($i == ($patternsLen - 1) && $patterns[$i] == $this->wildcardPattern) {
+        return $params;
+      }
+      if ($patterns[$i] != $this->wildcardPattern && $patterns[$i] != $this->paths[$i]) {
+        return false;
       }
     }
     if (count($params) != ($meta['paramsSize'])) {
-      return;
+      return false;
     }
     return $params;
   }
