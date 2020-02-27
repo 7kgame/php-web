@@ -60,6 +60,9 @@ abstract class GeneralDao extends QKObject {
     $fieldName = $type.':'.$conf['host'].','.$conf['port'];
     if($type == self::DB_MYSQL) {
       $fieldName = 'mysql:'.$conf['host'].','.$conf['port'].','.$conf['user'];
+      if (!empty($conf['dbName'])) {
+        $fieldName .= ','.$conf['dbName'];
+      }
     }
     $this->registerGlobalObject($fieldName, $classPath, $conf);
     return $fieldName;
@@ -284,7 +287,34 @@ abstract class GeneralDao extends QKObject {
       throw new \Exception('dbName or tableName can\'t be empty');
     }
     return $this->getMysql()->deleteByCondition($dbName, $tblName, $condition);
-  } 
+  }
+
+  public function replaceEntity (array $data, array $pks) {
+    $conditions = array();
+    foreach ($pks as $pk) {
+      if (!isset($data[$pk])) {
+        return false;
+      }
+      $conditions[$pk] = $data[$pk];
+    }
+    $doUpdate = false;
+    if (!empty($conditions)) {
+      $row = $this->getEntity($conditions, $pks);
+      $doUpdate = !empty($row);
+    }
+
+    if ($doUpdate) {
+      $updateData = array();
+      foreach ($data as $k => $v) {
+        if (!isset($conditions[$k])) {
+          $updateData[$k] = $v;
+        }
+      }
+      return $this->updateEntity(array_keys($updateData), array_values($updateData), $conditions);
+    } else {
+      return $this->insertEntity(array_keys($data), array_values($data));
+    }
+  }
 
   protected function getDbNameAndTblName() {
     return array('', '');
