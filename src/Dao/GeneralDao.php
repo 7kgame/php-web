@@ -261,9 +261,9 @@ abstract class GeneralDao extends QKObject {
         $sql .= " order by $sortField $sort";
       }
     }
-    if ($limit > 1) {
+    if ($limit > 0) {
       $sql .= " limit $limit";
-      if($offset>0){
+      if($offset > 0){
         $sql .= " offset $offset";
       }
     } else {
