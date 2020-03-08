@@ -310,6 +310,9 @@ abstract class GeneralDao extends QKObject {
           $updateData[$k] = $v;
         }
       }
+      if (empty($updateData)) {
+        return false;
+      }
       return $this->updateEntity(array_keys($updateData), array_values($updateData), $conditions);
     } else {
       return $this->insertEntity(array_keys($data), array_values($data));
